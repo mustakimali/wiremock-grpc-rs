@@ -24,7 +24,6 @@ mod tests {
     async fn it_works() {
         // Server
         let mut server = MockGrpcServer::new(50055).start().await;
-        tokio::time::sleep(Duration::from_secs(1)).await;
 
         server.setup(
             RequestBuilder::given("/")

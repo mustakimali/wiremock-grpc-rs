@@ -33,17 +33,13 @@ impl MockGrpcServer {
     }
 
     pub async fn start(mut self) -> Self {
-        debug!("Starting gRPC started in {}", self.address());
+        println!("Starting gRPC started in {}", self.address());
 
         let thread = tokio::spawn(
             tonic::transport::Server::builder()
                 .add_service(self.clone())
-                .serve(format!("[::1]:{}", self.address.port()).parse().unwrap()),
+                .serve(self.address),
         );
-
-        self.inner = Arc::new(Some(Inner {
-            join_handle: thread,
-        }));
 
         for _ in 0..40 {
             if TcpStream::connect_timeout(&self.address, std::time::Duration::from_millis(25))
@@ -55,7 +51,12 @@ impl MockGrpcServer {
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
 
-        debug!("Server started in {}", self.address());
+
+        self.inner = Arc::new(Some(Inner {
+            join_handle: thread,
+        }));
+
+        println!("Server started in {}", self.address());
         self
     }
 
