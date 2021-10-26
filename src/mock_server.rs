@@ -1,14 +1,11 @@
 use log::debug;
-use prost::{bytes::Buf, Message};
 use std::{
-    io::Cursor,
-    net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream},
+    net::{SocketAddr, TcpStream},
     sync::{Arc, RwLock},
     task::Poll,
     time::Duration,
 };
 use tonic::{
-    body::BoxBody,
     codegen::{http, Body, Never, StdError},
     Code, Status,
 };

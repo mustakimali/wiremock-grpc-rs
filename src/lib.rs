@@ -4,7 +4,7 @@ pub mod mock_server;
 pub use mock_server::*;
 #[cfg(test)]
 mod tests {
-    use std::{net::TcpStream, time::Duration};
+    use std::{net::TcpStream};
 
     use tonic::Code;
 
