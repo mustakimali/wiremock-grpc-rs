@@ -7,7 +7,7 @@ use std::{
 };
 use tonic::{
     codegen::{http, Body, Never, StdError},
-    Code, Status,
+    Code,
 };
 
 #[derive(Clone)]
@@ -92,45 +92,67 @@ where
         let path = req.uri().path();
         let inner = self.rules.as_ref();
         let inner = inner.read().unwrap();
+
         if let Some(req_builder) = inner.iter().find(|x| x.path == path) {
             println!("Matched rule {:?}", req_builder);
+            let status = req_builder.status_code.unwrap_or(Code::Ok) as u32;
+            println!("Setting status: {}", status);
             let builder = http::Response::builder()
                 .status(200)
                 .header("content-type", "application/grpc")
                 .header(
                     "grpc-status",
-                    Status::new(req_builder.status_code.unwrap_or(Code::Ok), "").to_string(),
+                    format!("{}", status),
                 );
 
             if let Some(body) = &req_builder.result {
+                println!("Returning body ({} bytes)", body.len());
+                let smart = true;
+
+                if smart {
+                    // let fut = async move {
+                    //     let codec = tonic::codec::ProstCodec::default();
+                    //     let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                    //         (),
+                    //         (),
+                    //     );
+                    //     let res = grpc.unary(method, req).await;
+                    //     Ok(res)
+                    // };
+                    // return Box::pin(fut)
+                }
+
                 let body = body.clone();
                 return Box::pin(async move {
-                    let s = prost::bytes::Bytes::from(body);
-                    let b = http_body::Full::new(s);
-                    let b = http_body::combinators::BoxBody::new(b)
+                    let body = prost::bytes::Bytes::from(body);
+                    let body = http_body::Full::new(body);
+                    let body = http_body::combinators::BoxBody::new(body)
                         .map_err(|err| match err {})
                         .boxed_unsync();
-                    let b = tonic::body::BoxBody::new(b);
-                    let b = builder.body(b).unwrap();
+                    let body = tonic::body::BoxBody::new(body);
+                    let body = builder.body(body).unwrap();
 
-                    Ok(b)
+                    Ok(body)
                 });
             } else {
+                println!("Returning empty body");
+
                 return Box::pin(async move {
-                    let b = builder.body(tonic::body::empty_body()).unwrap();
-                    Ok(b)
+                    let body = builder.body(tonic::body::empty_body()).unwrap();
+                    Ok(body)
                 });
             };
+        } else {
+            println!("Request unhandled");
+            Box::pin(async move {
+                Ok(http::Response::builder()
+                    .status(200)
+                    .header("grpc-status", "12")
+                    .header("content-type", "application/grpc")
+                    .body(tonic::body::empty_body())
+                    .unwrap())
+            })
         }
-
-        Box::pin(async move {
-            Ok(http::Response::builder()
-                .status(200)
-                .header("grpc-status", "12")
-                .header("content-type", "application/grpc")
-                .body(tonic::body::empty_body())
-                .unwrap())
-        })
     }
 }
 
