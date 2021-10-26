@@ -4,7 +4,7 @@ pub mod mock_server;
 pub use mock_server::*;
 #[cfg(test)]
 mod tests {
-    use std::{net::TcpStream};
+    use std::net::TcpStream;
 
     use tonic::Code;
 
@@ -28,7 +28,9 @@ mod tests {
         server.setup(
             RequestBuilder::given("/hello.Greeter/SayHello")
                 .return_status(Code::Ok)
-                .return_body(|| HelloReply { message: "yo".into(),}),
+                .return_body(|| HelloReply {
+                    message: "yo".into(),
+                }),
         );
 
         // Client
