@@ -1,12 +1,14 @@
 use log::debug;
-use prost::Message;
+use prost::{bytes::Buf, Message};
 use std::{
+    io::Cursor,
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream},
     sync::{Arc, RwLock},
     task::Poll,
     time::Duration,
 };
 use tonic::{
+    body::BoxBody,
     codegen::{http, Body, Never, StdError},
     Code, Status,
 };
@@ -51,7 +53,6 @@ impl MockGrpcServer {
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
 
-
         self.inner = Arc::new(Some(Inner {
             join_handle: thread,
         }));
@@ -93,7 +94,9 @@ where
 
         let path = req.uri().path();
         let inner = self.rules.as_ref();
-        if let Some(req_builder) = inner.read().unwrap().iter().find(|x| x.path == path) {
+        let inner = inner.read().unwrap();
+        if let Some(req_builder) = inner.iter().find(|x| x.path == path) {
+            println!("Matched rule {:?}", req_builder);
             let builder = http::Response::builder()
                 .status(200)
                 .header("content-type", "application/grpc")
@@ -103,10 +106,24 @@ where
                 );
 
             if let Some(body) = &req_builder.result {
-                builder.body(body).unwrap();
+                let body = body.clone();
+                return Box::pin(async move {
+                    let s = prost::bytes::Bytes::from(body);
+                    let b = http_body::Full::new(s);
+                    let b = http_body::combinators::BoxBody::new(b)
+                        .map_err(|err| match err {})
+                        .boxed_unsync();
+                    let b = tonic::body::BoxBody::new(b);
+                    let b = builder.body(b).unwrap();
+
+                    Ok(b)
+                });
             } else {
-                builder.body(tonic::body::empty_body()).unwrap();
-            }
+                return Box::pin(async move {
+                    let b = builder.body(tonic::body::empty_body()).unwrap();
+                    Ok(b)
+                });
+            };
         }
 
         Box::pin(async move {
@@ -120,6 +137,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub struct RequestBuilder {
     path: String,
     status_code: Option<tonic::Code>,

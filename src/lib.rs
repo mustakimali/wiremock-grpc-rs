@@ -26,7 +26,7 @@ mod tests {
         let mut server = MockGrpcServer::new(50055).start().await;
 
         server.setup(
-            RequestBuilder::given("/")
+            RequestBuilder::given("/hello.Greeter/SayHello")
                 .return_status(Code::Ok)
                 .return_body(|| HelloReply {
                     message: "yo".into(),
