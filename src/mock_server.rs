@@ -26,7 +26,7 @@ struct Inner {
 impl MockGrpcServer {
     pub fn new(port: u16) -> Self {
         Self {
-            address: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port),
+            address: format!("[::1]:{}", port).parse().unwrap(),
             inner: Arc::default(),
             rules: Arc::default(),
         }
@@ -72,7 +72,7 @@ impl MockGrpcServer {
 }
 
 impl tonic::transport::NamedService for MockGrpcServer {
-    const NAME: &'static str = "wiremock.server";
+    const NAME: &'static str = "hello.Greeter";
 }
 
 impl<B> tonic::codegen::Service<http::Request<B>> for MockGrpcServer
