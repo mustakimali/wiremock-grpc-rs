@@ -10,6 +10,8 @@ use tonic::{
     Code,
 };
 
+
+
 #[derive(Clone)]
 pub struct MockGrpcServer {
     address: SocketAddr,
@@ -89,6 +91,10 @@ where
     fn call(&mut self, req: http::Request<B>) -> Self::Future {
         println!("Request to {}", req.uri().path());
 
+        let builder = http::Response::builder()
+            .status(200)
+            .header("content-type", "application/grpc");
+
         let path = req.uri().path();
         let inner = self.rules.as_ref();
         let inner = inner.read().unwrap();
@@ -97,21 +103,22 @@ where
             println!("Matched rule {:?}", req_builder);
             let status = req_builder.status_code.unwrap_or(Code::Ok) as u32;
             println!("Setting status: {}", status);
-            let builder = http::Response::builder()
-                .status(200)
-                .header("content-type", "application/grpc")
-                .header("grpc-status", format!("{}", status));
+            let builder = builder.header("grpc-status", format!("{}", status));
 
             if let Some(body) = &req_builder.result {
                 println!("Returning body ({} bytes)", body.len());
                 let body = body.clone();
 
                 return Box::pin(async move {
+                    // let res = async move {greeter_code::HelloReply {
+                    //     message: "yo".into(),
+                    // }};
+                    // let buf = Vec::default();
+
                     let body = prost::bytes::Bytes::from(body);
                     let body = http_body::Full::new(body);
-                    let body = http_body::combinators::BoxBody::new(body)
-                        .map_err(|err| match err {})
-                        .boxed_unsync();
+                    let body =
+                        http_body::combinators::BoxBody::new(body).map_err(|err| match err {});
                     let body = tonic::body::BoxBody::new(body);
                     let body = builder.body(body).unwrap();
 
@@ -128,10 +135,8 @@ where
         } else {
             println!("Request unhandled");
             Box::pin(async move {
-                Ok(http::Response::builder()
-                    .status(200)
+                Ok(builder
                     .header("grpc-status", "12")
-                    .header("content-type", "application/grpc")
                     .body(tonic::body::empty_body())
                     .unwrap())
             })
