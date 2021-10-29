@@ -45,10 +45,12 @@ mod tests {
             .say_hello(HelloRequest {
                 name: "Yo yo".into(),
             })
-            .await
-            .unwrap();
-
-        assert_eq!("", response.into_inner().message);
+            .await;
+        if let Err(e) = response {
+            println!("Error {}", dbg!(e).message());
+        } else if let Ok(response) = response {
+            assert_eq!("", response.into_inner().message);
+        }
     }
 
     #[test]

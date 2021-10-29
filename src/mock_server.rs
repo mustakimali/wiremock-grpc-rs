@@ -10,7 +10,7 @@ use tonic::{
     Code,
 };
 
-
+use crate::greeter_code::{self};
 
 #[derive(Clone)]
 pub struct MockGrpcServer {
@@ -120,9 +120,10 @@ where
                     let body =
                         http_body::combinators::BoxBody::new(body).map_err(|err| match err {});
                     let body = tonic::body::BoxBody::new(body);
-                    let body = builder.body(body).unwrap();
 
-                    Ok(body)
+                    let response = builder.body(body).expect("Set body");
+
+                    Ok(response)
                 });
             } else {
                 println!("Returning empty body");
@@ -142,6 +143,50 @@ where
             })
         }
     }
+}
+
+async fn something_else<B>(
+    req: http::Request<B>,
+    body: Vec<u8>,
+) -> Result<
+    tonic::codegen::http::Response<
+        http_body::combinators::UnsyncBoxBody<prost::bytes::Bytes, tonic::Status>,
+    >,
+    tonic::codegen::Never,
+>
+where
+    B: Body + Send + 'static,
+    B::Error: Into<StdError> + Send + 'static,
+{
+    #[allow(non_camel_case_types)]
+    struct SayHelloSvc(Vec<u8>);
+    impl tonic::server::UnaryService<greeter_code::HelloRequest> for SayHelloSvc {
+        type Response = greeter_code::HelloReply;
+        type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+        fn call(&mut self, request: tonic::Request<greeter_code::HelloRequest>) -> Self::Future {
+            let inner = self.0.clone();
+            let r = greeter_code::HelloReply {
+                message: "yo".into(),
+            };
+            let fut = async move { Ok(tonic::Response::new(r)) };
+
+            Box::pin(fut)
+        }
+    }
+
+    let fut = {
+        let method = SayHelloSvc(body);
+        let codec = tonic::codec::ProstCodec::default();
+        let mut grpc = tonic::server::Grpc::new(codec);
+        let res = grpc.unary(method, req).await.boxed_unsync();
+
+        res
+    };
+    // Result<tonic::codegen::http::Response<UnsyncBoxBody<prost::bytes::Bytes, Status>>, tonic::codegen::Never>
+    // Pin<Box<impl Future>>
+    //return fut;
+
+    todo!();
 }
 
 #[derive(Debug)]
