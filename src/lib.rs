@@ -1,3 +1,6 @@
+#![allow(incomplete_features)]
+#![feature(unsized_locals, unsized_fn_params)]
+
 mod greeter_code;
 pub mod mock_server;
 
@@ -6,12 +9,9 @@ pub use mock_server::*;
 mod tests {
     use std::net::TcpStream;
 
-    use tonic::Code;
+    use tonic::{Code, IntoRequest};
 
-    use crate::{
-        greeter_code::{greeter_client, HelloReply, HelloRequest},
-        MockGrpcServer, RequestBuilder,
-    };
+    use crate::{MockGrpcServer, RequestBuilder, greeter_code::{self, HelloReply, HelloRequest, greeter_client}};
 
     #[tokio::test]
     async fn it_starts_with_specified_port() {
@@ -49,6 +49,23 @@ mod tests {
             .unwrap();
         
         assert_eq!("yo", response.into_inner().message);
+    }
+
+    struct Msg(dyn prost::Message);
+
+    #[test]
+    fn learn_rust() {
+        let mut v: Vec<Box<dyn prost::Message>> = Vec::default();
+
+        v.push(Box::new(greeter_code::HelloRequest{name: "name".into()}));
+        v.push(Box::new(greeter_code::HelloReply{message: "message".into()}));
+
+        let r = v.pop().unwrap();
+        //let r = r.encode_to_vec();
+        
+
+        //assert_eq!(4, r.len());
+
     }
 
     #[test]
