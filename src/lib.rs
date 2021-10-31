@@ -9,21 +9,21 @@ mod tests {
     use tonic::Code;
 
     use crate::{
-        greeter_code::{self, greeter_client, HelloReply, HelloRequest},
+        greeter_code::{greeter_client, HelloReply, HelloRequest},
         MockGrpcServer, RequestBuilder,
     };
 
     #[tokio::test]
     async fn it_starts_with_specified_port() {
-        let server = MockGrpcServer::new(50055).start().await;
+        let server = MockGrpcServer::start_default().await;
 
         assert!(TcpStream::connect(&server.address()).is_ok())
     }
 
     #[tokio::test]
-    async fn it_works() {
+    async fn handled_when_mock_set() {
         // Server
-        let mut server = MockGrpcServer::new(50055).start().await;
+        let mut server = MockGrpcServer::start_default().await;
 
         server.setup(
             RequestBuilder::given("/hello.Greeter/SayHello")
@@ -34,10 +34,14 @@ mod tests {
         );
 
         // Client
-        let channel = tonic::transport::Channel::from_static("http://[::1]:50055")
-            .connect()
-            .await
-            .unwrap();
+        let channel = tonic::transport::Channel::from_shared(format!(
+            "http://[::1]:{}",
+            server.address().port()
+        ))
+        .unwrap()
+        .connect()
+        .await
+        .unwrap();
         let mut client = greeter_client::GreeterClient::new(channel);
 
         // Act
@@ -51,26 +55,36 @@ mod tests {
         assert_eq!("yo", response.into_inner().message);
     }
 
-    struct Msg(dyn prost::Message);
+    #[tokio::test]
+    #[should_panic]
+    async fn panic_when_mock_not_set() {
+        // Server
+        let server = MockGrpcServer::start_default().await;
 
-    #[test]
-    fn learn_rust() {
-        let mut v: Vec<Box<dyn prost::Message>> = Vec::default();
+        // no mock is set up
 
-        v.push(Box::new(greeter_code::HelloRequest {
-            name: "name".into(),
-        }));
-        v.push(Box::new(greeter_code::HelloReply {
-            message: "message".into(),
-        }));
+        // Client
+        let channel = tonic::transport::Channel::from_shared(format!(
+            "http://[::1]:{}",
+            server.address().port()
+        ))
+        .unwrap()
+        .connect()
+        .await
+        .unwrap();
+        let mut client = greeter_client::GreeterClient::new(channel);
 
-        let _r = v.pop().unwrap();
-        //let r = r.encode_to_vec();
-
-        //assert_eq!(4, r.len());
+        // Act
+        let _ = client
+            .say_hello(HelloRequest {
+                name: "Yo yo".into(),
+            })
+            .await
+            .expect("Must panic");
     }
 
-    #[test]
+    //#[test]
+    #[allow(dead_code)]
     fn create() {
         let cd = std::env::current_dir().unwrap();
         std::env::set_var("OUT_DIR", &cd);

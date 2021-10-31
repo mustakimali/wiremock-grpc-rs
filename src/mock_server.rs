@@ -1,4 +1,3 @@
-use log::debug;
 use prost::{bytes::BufMut, Message};
 use std::{
     net::{SocketAddr, TcpStream},
@@ -33,6 +32,26 @@ impl MockGrpcServer {
         }
     }
 
+    pub async fn start_default() -> Self {
+        let port = MockGrpcServer::find_unused_port()
+            .await
+            .expect("Unable to find an open port");
+
+        MockGrpcServer::new(port).start().await
+    }
+
+    async fn find_unused_port() -> Option<u16> {
+        for port in 50000..60000 {
+            let addr: SocketAddr = format!("[::1]:{}", port).parse().unwrap();
+
+            if !TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_ok() {
+                return Some(port);
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+        None
+    }
+
     pub async fn start(mut self) -> Self {
         println!("Starting gRPC started in {}", self.address());
 
@@ -48,7 +67,6 @@ impl MockGrpcServer {
             {
                 break;
             }
-            debug!("WAITING...");
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
 
@@ -130,12 +148,7 @@ where
         }
 
         println!("Request unhandled");
-        Box::pin(async move {
-            Ok(builder
-                .header("grpc-status", "12")
-                .body(tonic::body::empty_body())
-                .unwrap())
-        })
+        panic!("Mock is not setup for {}", path);
     }
 }
 
@@ -145,16 +158,7 @@ impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
     type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
     fn call(&mut self, _: tonic::Request<Vec<u8>>) -> Self::Future {
         let body = self.0.clone();
-        let fut = async move {
-            // let body = prost::bytes::Bytes::from(body);
-            // let body = http_body::Full::new(body);
-            // let body =
-            //     http_body::combinators::BoxBody::new(body).map_err(|err| match err {});
-            // let body = tonic::body::BoxBody::new(body).boxed_unsync();
-            // let body = http::Response::new(body);
-
-            Ok(tonic::Response::new(body))
-        };
+        let fut = async move { Ok(tonic::Response::new(body)) };
 
         Box::pin(fut)
     }
