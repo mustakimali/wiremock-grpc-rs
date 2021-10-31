@@ -225,15 +225,16 @@ impl tonic::codec::Encoder for GenericProstEncoder{
     type Error = tonic::Status;
 
     fn encode(&mut self, item: Self::Item, buf: &mut tonic::codec::EncodeBuf<'_>) -> Result<(), Self::Error> {
-        // item.encode(buf)
-        //     .expect("Message only errors if not enough space");
+        // construct the BytesMut from the Vec<u8>
+        let mut b = prost::bytes::BytesMut::new();
+        for i in item {
+            b.put_u8(i);
+        }
 
-        let r = greeter_code::HelloReply{message:"yo".into()};
-        r.encode(buf).map_err(|_|  tonic::Status::internal("Could not do stuff"))?;
-
-        // for i in item {
-        //     buf.put_i64(i as i64);
-        // }
+        // copy to buffer
+        for i in b {
+            buf.put_u8(i);
+        }
 
         Ok(())
     }
@@ -295,7 +296,9 @@ impl RequestBuilder {
         T: prost::Message,
     {
         let result = f();
-        let result = result.encode_to_vec();
+        let mut buf = prost::bytes::BytesMut::new();
+        let _ = result.encode(&mut buf).expect("Unable to encode the message");
+        let result = buf.to_vec();
 
         Self {
             result: Some(result),
