@@ -14,7 +14,7 @@ pub trait Mountable {
 }
 
 #[derive(Debug)]
-pub struct RequestBuilder {
+pub struct MockBuilder {
     pub(crate) path: String,
     pub(crate) status_code: Option<tonic::Code>,
     pub(crate) result: Option<Vec<u8>>,
@@ -52,7 +52,7 @@ pub struct ThenBuilder {
     result: Option<Vec<u8>>,
 }
 
-impl RequestBuilder {
+impl MockBuilder {
     pub fn given(path: &str) -> Self {
         Self {
             path: path.into(),
@@ -66,7 +66,7 @@ impl RequestBuilder {
     }
 }
 
-impl Mountable for RequestBuilder {
+impl Mountable for MockBuilder {
     fn mount(self, s: &mut MockGrpcServer) {
         if self.status_code.is_none() && self.result.is_none() {
             panic!("Must set the status code or body before attempting to mount the rule.");
@@ -76,7 +76,7 @@ impl Mountable for RequestBuilder {
     }
 }
 
-impl Then for RequestBuilder {
+impl Then for MockBuilder {
     fn return_status(self, status: tonic::Code) -> Self {
         Self {
             status_code: Some(status),
@@ -130,9 +130,9 @@ impl Then for ThenBuilder {
     }
 }
 
-impl Into<RequestBuilder> for ThenBuilder {
-    fn into(self) -> RequestBuilder {
-        RequestBuilder {
+impl Into<MockBuilder> for ThenBuilder {
+    fn into(self) -> MockBuilder {
+        MockBuilder {
             path: self.path,
             status_code: self.status_code,
             result: self.result,
@@ -142,7 +142,7 @@ impl Into<RequestBuilder> for ThenBuilder {
 
 impl Mountable for ThenBuilder {
     fn mount(self, s: &mut MockGrpcServer) {
-        let rb: RequestBuilder = self.into();
+        let rb: MockBuilder = self.into();
 
         rb.mount(s)
     }

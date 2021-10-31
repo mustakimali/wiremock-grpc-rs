@@ -18,7 +18,7 @@ async fn handled_when_mock_set() {
     let mut server = MockGrpcServer::start_default().await;
 
     server.setup(
-        RequestBuilder::given("/hello.Greeter/SayHello")
+        MockBuilder::given("/hello.Greeter/SayHello")
             .return_status(Code::Ok)
             .return_body(|| HelloReply {
                 message: "yo".into(),
@@ -51,7 +51,7 @@ async fn handled_when_mock_set_with_different_status_code() {
     let mut server = MockGrpcServer::start_default().await;
 
     server.setup(
-        RequestBuilder::given("/hello.Greeter/SayHello")
+        MockBuilder::given("/hello.Greeter/SayHello")
             .return_status(Code::AlreadyExists)
             .return_body(|| HelloReply {
                 message: "yo".into(),

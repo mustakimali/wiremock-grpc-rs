@@ -4,12 +4,12 @@ use std::{
     time::Duration,
 };
 
-use crate::RequestBuilder;
+use crate::MockBuilder;
 #[derive(Clone)]
 pub struct MockGrpcServer {
     address: SocketAddr,
     inner: Arc<Option<Inner>>,
-    pub(crate) rules: Arc<RwLock<Vec<RequestBuilder>>>,
+    pub(crate) rules: Arc<RwLock<Vec<MockBuilder>>>,
 }
 
 struct Inner {

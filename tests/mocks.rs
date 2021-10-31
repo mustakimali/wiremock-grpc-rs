@@ -13,14 +13,14 @@ async fn mock_builder() {
     let mut server = MockGrpcServer::start_default().await;
 
     server.setup(
-        RequestBuilder::when()
+        MockBuilder::when()
             .path("/")
             .then()
             .return_status(Code::AlreadyExists),
     );
 
     server.setup(
-        RequestBuilder::when()
+        MockBuilder::when()
             .path("/")
             .then()
             .return_status(Code::AlreadyExists)
