@@ -26,6 +26,15 @@ struct Inner {
     join_handle: tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
 }
 
+impl Drop for MockGrpcServer {
+    fn drop(&mut self) {
+        if let Some(r) = self.inner.as_ref() {
+            println!("Terminating server");
+            drop(&r.join_handle);
+        }
+    }
+}
+
 impl MockGrpcServer {
     pub fn new(port: u16) -> Self {
         Self {

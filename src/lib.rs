@@ -1,7 +1,50 @@
-mod greeter_code;
-pub mod mock_server;
+//! # wiremock-grpc-rs
+//! Mock gRPC server to test your outgoing gRPC requests.
+//! ## Example
+//! ```
+//! use wiremock_grpc_rs::{MockGrpcServer, RequestBuilder};
+//! use crate::{example::{greeter_client, HelloRequest, HelloReply}};
+//! use tonic::Code;
+//!
+//! tokio_test::block_on(async {
+//!  // Server
+//! let mut server = MockGrpcServer::start_default().await;
+//!
+//! server.setup(
+//!     RequestBuilder::given("/hello.Greeter/SayHello")
+//!         .return_status(Code::Ok)
+//!         .return_body(|| HelloReply {
+//!             message: "yo".into(),
+//!         }),
+//! );
+//!
+//! // Client
+//! let channel = tonic::transport::Channel::from_shared(format!(
+//!     "http://[::1]:{}",
+//!     server.address().port()
+//! ))
+//! .unwrap()
+//! .connect()
+//! .await
+//! .unwrap();
+//! let mut client = example::GreeterClient::new(channel);
+//!
+//! // Act
+//! let response = client
+//!     .say_hello(HelloRequest {
+//!         name: "Yo yo".into(),
+//!     })
+//!     .await
+//!     .unwrap();
+//!
+//! assert_eq!("yo", response.into_inner().message);
+//! });
+//!  ```
+mod example;
+mod mock_server;
 
-pub use mock_server::*;
+pub use mock_server::{MockGrpcServer, RequestBuilder};
+
 #[cfg(test)]
 mod tests {
     use std::net::TcpStream;
@@ -9,7 +52,7 @@ mod tests {
     use tonic::Code;
 
     use crate::{
-        greeter_code::{greeter_client, HelloReply, HelloRequest},
+        example::{greeter_client, HelloReply, HelloRequest},
         MockGrpcServer, RequestBuilder,
     };
 
