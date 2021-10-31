@@ -153,17 +153,17 @@ pub mod greeter_server {
                             request: tonic::Request<super::HelloRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { 
+                            let fut = async move {
                                 let r = (*inner).say_hello(request).await;
                                 r
-                             };
+                            };
                             Box::pin(fut)
                         }
                     }
                     let accept_compression_encodings = self.accept_compression_encodings;
                     let send_compression_encodings = self.send_compression_encodings;
                     let inner = self.inner.clone();
-                    let fut  = async move {
+                    let fut = async move {
                         let inner = inner.0;
                         let method = SayHelloSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
