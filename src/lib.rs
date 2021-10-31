@@ -15,7 +15,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_starts_with_specified_port() {
-        let server = MockGrpcServer::start_default().await;
+        let server = MockGrpcServer::new(5055).start().await;
 
         assert!(TcpStream::connect(&server.address()).is_ok())
     }
