@@ -55,6 +55,46 @@ mod tests {
         assert_eq!("yo", response.into_inner().message);
     }
 
+
+    #[tokio::test]
+    async fn handled_when_mock_set_with_different_status_code() {
+        // Server
+        let mut server = MockGrpcServer::start_default().await;
+
+        server.setup(
+            RequestBuilder::given("/hello.Greeter/SayHello")
+                .return_status(Code::AlreadyExists)
+                .return_body(|| HelloReply {
+                    message: "yo".into(),
+                }),
+        );
+
+        // Client
+        let channel = tonic::transport::Channel::from_shared(format!(
+            "http://[::1]:{}",
+            server.address().port()
+        ))
+        .unwrap()
+        .connect()
+        .await
+        .unwrap();
+        let mut client = greeter_client::GreeterClient::new(channel);
+
+        // Act
+        let response = client
+            .say_hello(HelloRequest {
+                name: "Yo yo".into(),
+            })
+            .await
+            .unwrap();
+
+        assert!(dbg!(response.metadata()).contains_key("grpc-status"));
+        assert_eq!("6", response.metadata().get("grpc-status").unwrap().to_str().unwrap());
+        assert_eq!("yo", response.into_inner().message);
+        
+    }
+
+
     #[tokio::test]
     #[should_panic]
     async fn panic_when_mock_not_set() {
