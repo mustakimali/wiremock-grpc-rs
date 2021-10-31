@@ -1,9 +1,16 @@
 use log::debug;
-use prost::{Message, bytes::BufMut};
-use std::{marker::PhantomData, net::{SocketAddr, TcpStream}, sync::{Arc, RwLock}, task::Poll, time::Duration};
-use tonic::{Code, codec::Codec, codegen::{http, Body, Never, StdError}};
-
-use crate::greeter_code::{self};
+use prost::{bytes::BufMut, Message};
+use std::{
+    net::{SocketAddr, TcpStream},
+    sync::{Arc, RwLock},
+    task::Poll,
+    time::Duration,
+};
+use tonic::{
+    codec::Codec,
+    codegen::{http, Body, Never, StdError},
+    Code,
+};
 
 #[derive(Clone)]
 pub struct MockGrpcServer {
@@ -100,43 +107,18 @@ where
 
             if let Some(body) = &req_builder.result {
                 println!("Returning body ({} bytes)", body.len());
-
-                let body = greeter_code::HelloReply {
-                    message: "yo".into(),
-                };
+                let body = body.clone();
 
                 let fut = async move {
-                    let method = SvcGeneric(body.encode_to_vec());
-                    let codec = GenericCodec::default(); // ToDo: Implement
+                    let method = SvcGeneric(body);
+                    let codec = GenericCodec::default();
 
-                    //let method = SvcStaticTyped(body);
-                    //let codec = tonic::codec::ProstCodec::default();
-                    
                     let mut grpc = tonic::server::Grpc::new(codec);
                     let res = grpc.unary(method, req).await;
 
                     Ok(res)
                 };
                 return Box::pin(fut);
-
-                /*
-                return Box::pin(async move {
-                    // let res = async move {greeter_code::HelloReply {
-                    //     message: "yo".into(),
-                    // }};
-                    // let buf = Vec::default();
-
-                    let body = prost::bytes::Bytes::from(body);
-                    let body = http_body::Full::new(body);
-                    let body =
-                        http_body::combinators::BoxBody::new(body).map_err(|err| match err {});
-                    let body = tonic::body::BoxBody::new(body);
-
-                    let response = builder.body(body).expect("Set body");
-
-                    Ok(response)
-                });
-                */
             } else {
                 println!("Returning empty body");
 
@@ -145,28 +127,15 @@ where
                     Ok(body)
                 });
             };
-        } else {
-            println!("Request unhandled");
-            Box::pin(async move {
-                Ok(builder
-                    .header("grpc-status", "12")
-                    .body(tonic::body::empty_body())
-                    .unwrap())
-            })
         }
-    }
-}
 
-#[allow(non_camel_case_types)]
-struct SvcStaticTyped(greeter_code::HelloReply);
-impl tonic::server::UnaryService<greeter_code::HelloRequest> for SvcStaticTyped {
-    type Response = greeter_code::HelloReply;
-    type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-    fn call(&mut self, _: tonic::Request<greeter_code::HelloRequest>) -> Self::Future {
-        let r = self.0.clone();
-        let fut = async move { Ok(tonic::Response::new(r)) };
-
-        Box::pin(fut)
+        println!("Request unhandled");
+        Box::pin(async move {
+            Ok(builder
+                .header("grpc-status", "12")
+                .body(tonic::body::empty_body())
+                .unwrap())
+        })
     }
 }
 
@@ -176,7 +145,7 @@ impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
     type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
     fn call(&mut self, _: tonic::Request<Vec<u8>>) -> Self::Future {
         let body = self.0.clone();
-        let fut = async move { 
+        let fut = async move {
             // let body = prost::bytes::Bytes::from(body);
             // let body = http_body::Full::new(body);
             // let body =
@@ -191,7 +160,6 @@ impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
     }
 }
 
-
 struct GenericCodec;
 
 impl Default for GenericCodec {
@@ -200,7 +168,7 @@ impl Default for GenericCodec {
     }
 }
 
-impl Codec for GenericCodec{
+impl Codec for GenericCodec {
     type Encode = Vec<u8>;
     type Decode = Vec<u8>;
 
@@ -212,7 +180,7 @@ impl Codec for GenericCodec{
     }
 
     fn decoder(&mut self) -> Self::Decoder {
-        GenericProstDecoder{}
+        GenericProstDecoder {}
     }
 }
 
@@ -220,11 +188,15 @@ impl Codec for GenericCodec{
 #[derive(Debug, Clone, Default)]
 pub struct GenericProstEncoder(Vec<u8>);
 
-impl tonic::codec::Encoder for GenericProstEncoder{
+impl tonic::codec::Encoder for GenericProstEncoder {
     type Item = Vec<u8>;
     type Error = tonic::Status;
 
-    fn encode(&mut self, item: Self::Item, buf: &mut tonic::codec::EncodeBuf<'_>) -> Result<(), Self::Error> {
+    fn encode(
+        &mut self,
+        item: Self::Item,
+        buf: &mut tonic::codec::EncodeBuf<'_>,
+    ) -> Result<(), Self::Error> {
         // construct the BytesMut from the Vec<u8>
         let mut b = prost::bytes::BytesMut::new();
         for i in item {
@@ -248,7 +220,10 @@ impl tonic::codec::Decoder for GenericProstDecoder {
     type Item = Vec<u8>;
     type Error = tonic::Status;
 
-    fn decode(&mut self, buf: &mut tonic::codec::DecodeBuf<'_>) -> Result<Option<Self::Item>, Self::Error> {
+    fn decode(
+        &mut self,
+        buf: &mut tonic::codec::DecodeBuf<'_>,
+    ) -> Result<Option<Self::Item>, Self::Error> {
         let item = Message::decode(buf)
             .map(Option::Some)
             .map_err(from_decode_error)?;
@@ -297,7 +272,9 @@ impl RequestBuilder {
     {
         let result = f();
         let mut buf = prost::bytes::BytesMut::new();
-        let _ = result.encode(&mut buf).expect("Unable to encode the message");
+        let _ = result
+            .encode(&mut buf)
+            .expect("Unable to encode the message");
         let result = buf.to_vec();
 
         Self {

@@ -64,7 +64,7 @@ mod tests {
             message: "message".into(),
         }));
 
-        let r = v.pop().unwrap();
+        let _r = v.pop().unwrap();
         //let r = r.encode_to_vec();
 
         //assert_eq!(4, r.len());
