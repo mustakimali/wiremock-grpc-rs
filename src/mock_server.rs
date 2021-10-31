@@ -7,7 +7,10 @@ use std::{
 };
 use tonic::{
     codec::Codec,
-    codegen::{http, Body, Never, StdError},
+    codegen::{
+        http::{self, HeaderValue},
+        Body, Never, StdError,
+    },
     Code,
 };
 
@@ -109,19 +112,13 @@ where
     fn call(&mut self, req: http::Request<B>) -> Self::Future {
         println!("Request to {}", req.uri().path());
 
-        let builder = http::Response::builder()
-            .status(200)
-            .header("content-type", "application/grpc");
-
         let path = req.uri().path();
         let inner = self.rules.as_ref();
         let inner = inner.read().unwrap();
 
         if let Some(req_builder) = inner.iter().find(|x| x.path == path) {
             println!("Matched rule {:?}", req_builder);
-            let status = req_builder.status_code.unwrap_or(Code::Ok) as u32;
-            println!("Setting status: {}", status);
-            let builder = builder.header("grpc-status", format!("{}", status));
+            let code = req_builder.status_code.unwrap_or(Code::Ok);
 
             if let Some(body) = &req_builder.result {
                 println!("Returning body ({} bytes)", body.len());
@@ -132,13 +129,21 @@ where
                     let codec = GenericCodec::default();
 
                     let mut grpc = tonic::server::Grpc::new(codec);
-                    let res = grpc.unary(method, req).await;
-
-                    Ok(res)
+                    let mut result = grpc.unary(method, req).await;
+                    result.headers_mut().append(
+                        "grpc-status",
+                        HeaderValue::from_str(format!("{}", code as u32).as_str()).unwrap(),
+                    );
+                    Ok(result)
                 };
                 return Box::pin(fut);
             } else {
-                println!("Returning empty body");
+                let status = code as u32;
+                let builder = http::Response::builder()
+                    .status(200)
+                    .header("content-type", "application/grpc")
+                    .header("grpc-status", format!("{}", status));
+                println!("Returning empty body with status {}", status);
 
                 return Box::pin(async move {
                     let body = builder.body(tonic::body::empty_body()).unwrap();

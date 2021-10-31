@@ -55,7 +55,6 @@ mod tests {
         assert_eq!("yo", response.into_inner().message);
     }
 
-
     #[tokio::test]
     async fn handled_when_mock_set_with_different_status_code() {
         // Server
@@ -85,15 +84,11 @@ mod tests {
             .say_hello(HelloRequest {
                 name: "Yo yo".into(),
             })
-            .await
-            .unwrap();
+            .await;
 
-        assert!(dbg!(response.metadata()).contains_key("grpc-status"));
-        assert_eq!("6", response.metadata().get("grpc-status").unwrap().to_str().unwrap());
-        assert_eq!("yo", response.into_inner().message);
-        
+        assert!(response.is_err());
+        assert_eq!(Code::AlreadyExists, response.err().unwrap().code());
     }
-
 
     #[tokio::test]
     #[should_panic]
