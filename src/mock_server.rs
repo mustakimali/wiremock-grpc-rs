@@ -1,14 +1,7 @@
 use log::debug;
-use std::{
-    net::{SocketAddr, TcpStream},
-    sync::{Arc, RwLock},
-    task::Poll,
-    time::Duration,
-};
-use tonic::{
-    codegen::{http, Body, Never, StdError},
-    Code,
-};
+use prost::Message;
+use std::{marker::PhantomData, net::{SocketAddr, TcpStream}, sync::{Arc, RwLock}, task::Poll, time::Duration};
+use tonic::{Code, codec::Codec, codegen::{http, Body, Never, StdError}};
 
 use crate::greeter_code::{self};
 
@@ -114,7 +107,9 @@ where
 
                 let fut = async move {
                     let method = SvcStaticTyped(body);
+                    //let method = SvcGeneric(body.encode_to_vec());
                     let codec = tonic::codec::ProstCodec::default();
+                    //let codec = GenericCodec::default(); // ToDo: Implement
                     let mut grpc = tonic::server::Grpc::new(codec);
                     let res = grpc.unary(method, req).await;
 
@@ -172,6 +167,98 @@ impl tonic::server::UnaryService<greeter_code::HelloRequest> for SvcStaticTyped 
         Box::pin(fut)
     }
 }
+
+struct SvcGeneric(Vec<u8>);
+impl tonic::server::UnaryService<greeter_code::HelloRequest> for SvcGeneric {
+    type Response = http::Response<tonic::body::BoxBody>;
+    type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+    fn call(&mut self, _: tonic::Request<greeter_code::HelloRequest>) -> Self::Future {
+        let body = self.0.clone();
+        let fut = async move { 
+            let body = prost::bytes::Bytes::from(body);
+            let body = http_body::Full::new(body);
+            let body =
+                http_body::combinators::BoxBody::new(body).map_err(|err| match err {});
+            let body = tonic::body::BoxBody::new(body).boxed_unsync();
+            let body = http::Response::new(body);
+
+            Ok(tonic::Response::new(body))
+        };
+
+        Box::pin(fut)
+    }
+}
+
+/*
+struct GenericCodec<T, U>{
+    _pd: std::marker::PhantomData<(T, U)>,
+}
+impl<T, U> Default for GenericCodec<T, U> {
+    fn default() -> Self {
+        Self { _pd: std::marker::PhantomData }
+    }
+}
+
+impl<T, U> Codec for GenericCodec<T, U>
+where
+    T: Message + Send + 'static,
+    U: Message + Default + Send + 'static,
+{
+    type Encode = T;
+    type Decode = U;
+
+    type Encoder = GenericProstEncoder<T>;
+    type Decoder = GenericProstDecoder<U>;
+
+    fn encoder(&mut self) -> Self::Encoder {
+        GenericProstEncoder(PhantomData)
+    }
+
+    fn decoder(&mut self) -> Self::Decoder {
+        todo!()
+        //ProstDecoder(PhantomData)
+    }
+}
+
+/// A [`Encoder`] that knows how to encode `T`.
+#[derive(Debug, Clone, Default)]
+pub struct GenericProstEncoder<T>(PhantomData<T>);
+
+impl<T: Message> tonic::codec::Encoder for GenericProstDecoder<T> {
+    type Item = T;
+    type Error = tonic::Status;
+
+    fn encode(&mut self, item: Self::Item, buf: &mut tonic::codec::EncodeBuf<'_>) -> Result<(), Self::Error> {
+        item.encode(buf)
+            .expect("Message only errors if not enough space");
+
+        Ok(())
+    }
+}
+
+/// A [`Decoder`] that knows how to decode `U`.
+#[derive(Debug, Clone, Default)]
+pub struct GenericProstDecoder<U>(PhantomData<U>);
+
+impl<U: Message + Default> tonic::codec::Decoder for GenericProstDecoder<U> {
+    type Item = U;
+    type Error = tonic::Status;
+
+    fn decode(&mut self, buf: &mut tonic::codec::DecodeBuf<'_>) -> Result<Option<Self::Item>, Self::Error> {
+        let item = Message::decode(buf)
+            .map(Option::Some)
+            .map_err(from_decode_error)?;
+
+        Ok(item)
+    }
+}
+
+fn from_decode_error(error: prost::DecodeError) -> tonic::Status {
+    // Map Protobuf parse errors to an INTERNAL status code, as per
+    // https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+    tonic::Status::new(Code::Internal, error.to_string())
+}
+*/
 
 #[derive(Debug)]
 pub struct RequestBuilder {
