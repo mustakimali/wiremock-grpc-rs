@@ -3,7 +3,6 @@
 //! # Example
 //! ## Generate Server Code
 //! For each gRPC server you need to generate codes using the [`generate!`] macro.
-//! Pass the
 //! ```no_run
 //! mod hello_greeter_mock {
 //!   // hello.Greeter: Is the prefix of all rpc
