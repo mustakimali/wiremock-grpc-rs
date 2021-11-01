@@ -22,6 +22,8 @@ struct Inner {
 
 impl Drop for MockGrpcServer {
     fn drop(&mut self) {
+        println!("MockGrpcServer::Drop");
+
         if let Some(r) = self.inner.as_ref() {
             println!("Terminating server");
             drop(&r.join_handle);
@@ -30,7 +32,7 @@ impl Drop for MockGrpcServer {
 }
 
 impl MockGrpcServer {
-    pub(crate) fn new(port: u16) -> Self {
+    pub fn new(port: u16) -> Self {
         Self {
             address: format!("[::1]:{}", port).parse().unwrap(),
             inner: Arc::default(),
@@ -38,7 +40,7 @@ impl MockGrpcServer {
         }
     }
 
-    pub async fn start_default<F>(f: F) -> Self
+    pub async fn _start_default<F>(f: F) -> Self
     where
         F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
     {
@@ -46,10 +48,10 @@ impl MockGrpcServer {
             .await
             .expect("Unable to find an open port");
 
-        MockGrpcServer::new(port).start(f).await
+        MockGrpcServer::new(port)._start(f).await
     }
 
-    pub(crate) async fn find_unused_port() -> Option<u16> {
+    pub async fn find_unused_port() -> Option<u16> {
         let mut rng = rand::thread_rng();
 
         loop {
@@ -63,7 +65,7 @@ impl MockGrpcServer {
         }
     }
 
-    pub async fn start<F>(mut self, f: F) -> Self
+    pub async fn _start<F>(mut self, f: F) -> Self
     where
         F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
     {
