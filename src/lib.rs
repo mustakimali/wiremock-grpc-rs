@@ -1,16 +1,18 @@
 //! # wiremock-grpc-rs
 //! Mock gRPC server to test your outgoing gRPC requests.
 //! # Example
-//! ## Generate Stub
+//! ## Generate Server Code
+//! For each gRPC server you need to generate codes using the `generate!` macro.
+//! Pass the
 //! ```no_run
 //! mod hello_greeter_mock {
 //!   // hello.Greeter: Is the prefix of all rpc
 //!   // MyHelloServer: Arbitrary name of the generated Server
-//!    wiremock_grpc::generate_stub!("hello.Greeter", MyHelloServer);
+//!    wiremock_grpc::generate!("hello.Greeter", MyHelloServer);
 //! }
 //! use hello_greeter_mock::*;
-//! // MyHelloServer, MockBuilder are available to use
-//! // If multiple server are generated then use the
+//! // MyHelloServer, MockBuilder are available to use.
+//! // If multiple servers are generated then use the
 //! // module identifier eg. `hello_greeter_mock::MyHelloServer`
 //! ```
 //!
