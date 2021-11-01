@@ -4,7 +4,7 @@ use example::{greeter_client::GreeterClient, *};
 use tonic::Code;
 
 mod hello_greeter_mock {
-    wiremock_grpc::generate_stub!("hello.Greeter", Server);
+    wiremock_grpc::generate!("hello.Greeter", Server);
 }
 
 use hello_greeter_mock::*;
@@ -22,10 +22,12 @@ async fn handled_when_mock_set() {
     let mut server = Server::start_default().await;
 
     server.setup(
-        MockBuilder::given("/hello.Greeter/SayHello")
+        MockBuilder::when()
+            .path("/hello.Greeter/SayHello")
+            .then()
             .return_status(Code::Ok)
             .return_body(|| HelloReply {
-                message: "yo".into(),
+                message: "Hello Mustakim".into(),
             }),
     );
 
@@ -41,12 +43,12 @@ async fn handled_when_mock_set() {
     // Act
     let response = client
         .say_hello(HelloRequest {
-            name: "Yo yo".into(),
+            name: "Mustakim".into(),
         })
         .await
         .unwrap();
 
-    assert_eq!("yo", response.into_inner().message);
+    assert_eq!("Hello Mustakim", response.into_inner().message);
 }
 
 #[tokio::test]
@@ -117,6 +119,13 @@ fn create() {
     tonic_build::compile_protos(cd).expect("Unable to generate the code");
 }
 
+/// Generated code from `hello.proto` using `tonic::build`
+/// ```no_run
+/// let cd = std::env::current_dir().unwrap();
+/// std::env::set_var("OUT_DIR", &cd);
+/// let cd = cd.join("hello.proto");
+/// tonic_build::compile_protos(cd).expect("Unable to generate the code");
+/// ```
 mod example {
     /// The request message containing the user's name.
     #[derive(Clone, PartialEq, ::prost::Message)]

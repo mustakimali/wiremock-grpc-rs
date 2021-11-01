@@ -4,23 +4,30 @@
 //! ## Generate Stub
 //! ```no_run
 //! mod hello_greeter_mock {
-//!    wiremock_grpc::generate_stub!("hello.Greeter", Server);
+//!   // hello.Greeter: Is the prefix of all rpc
+//!   // MyHelloServer: Arbitrary name of the generated Server
+//!    wiremock_grpc::generate_stub!("hello.Greeter", MyHelloServer);
 //! }
 //! use hello_greeter_mock::*;
+//! // MyHelloServer, MockBuilder are available to use
+//! // If multiple server are generated then use the
+//! // module identifier eg. `hello_greeter_mock::MyHelloServer`
 //! ```
-//! 
+//!
 //! ## Use it
 //! ```no_run
 //! #[tokio::test]
 //! async fn handled_when_mock_set() {
 //!     // Server
-//!     let mut server = Server::start_default().await;
+//!     let mut server = MyHelloServer::start_default().await;
 //! 
 //!     server.setup(
-//!         MockBuilder::given("/hello.Greeter/SayHello")
+//!         MockBuilder::when()
+//!             .path("/hello.Greeter/SayHello")
+//!             .then()
 //!             .return_status(Code::Ok)
 //!             .return_body(|| HelloReply {
-//!                 message: "yo".into(),
+//!                 message: "Hello Mustakim".into(),
 //!             }),
 //!     );
 //! 
@@ -36,12 +43,12 @@
 //!     // Act
 //!     let response = client
 //!         .say_hello(HelloRequest {
-//!             name: "Yo yo".into(),
+//!             name: "Mustakim".into(),
 //!         })
 //!         .await
 //!         .unwrap();
 //! 
-//!     assert_eq!("yo", response.into_inner().message);
+//!     assert_eq!("Hello Mustakim", response.into_inner().message);
 //! }
 //! ```
 mod mock_server;

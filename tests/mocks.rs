@@ -1,5 +1,5 @@
 mod hello_greeter_mock {
-    wiremock_grpc::generate_stub!("hello.Greeter", MockGrpcServer);
+    wiremock_grpc::generate!("hello.Greeter", MockGrpcServer);
 }
 use hello_greeter_mock::*;
 

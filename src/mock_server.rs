@@ -1,5 +1,6 @@
+/// See doc for [`crate`]
 #[macro_export]
-macro_rules! generate_stub {
+macro_rules! generate {
     ($name:literal, $t:ident) => {
         use std::{
             net::{SocketAddr},
@@ -25,7 +26,7 @@ macro_rules! generate_stub {
         /// `
         /// # Example
         /// ```no_run
-        /// let mut server = 
+        /// let mut server =
         #[doc = std::stringify!($t)]
         /// ::start_default().await;
         /// ```
