@@ -2,13 +2,16 @@ use std::net::TcpStream;
 
 use example::{greeter_client::GreeterClient, *};
 use tonic::Code;
-use wiremock_grpc::gen_mock_server;
 
-gen_mock_server!("hello.Greeter", MyMock);
+mod hello_greeter_mock {
+    wiremock_grpc::generate_stub!("hello.Greeter", Server);
+}
+
+use hello_greeter_mock::*;
 
 #[tokio::test]
 async fn it_starts_with_specified_port() {
-    let server = MyMock::new(5055).start().await;
+    let server = Server::new(5055).start().await;
 
     assert!(TcpStream::connect(&server.address()).is_ok())
 }
@@ -16,7 +19,7 @@ async fn it_starts_with_specified_port() {
 #[tokio::test]
 async fn handled_when_mock_set() {
     // Server
-    let mut server = MyMock::start_default().await;
+    let mut server = Server::start_default().await;
 
     server.setup(
         MockBuilder::given("/hello.Greeter/SayHello")
@@ -49,7 +52,7 @@ async fn handled_when_mock_set() {
 #[tokio::test]
 async fn handled_when_mock_set_with_different_status_code() {
     // Server
-    let mut server = MyMock::start_default().await;
+    let mut server = Server::start_default().await;
 
     server.setup(
         MockBuilder::given("/hello.Greeter/SayHello")
@@ -83,7 +86,7 @@ async fn handled_when_mock_set_with_different_status_code() {
 #[should_panic]
 async fn panic_when_mock_not_set() {
     // Server
-    let server = MyMock::start_default().await;
+    let server = Server::start_default().await;
 
     // no mock is set up
 

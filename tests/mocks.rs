@@ -1,31 +1,35 @@
-// use tonic::Code;
-// use wiremock_grpc::*;
+mod hello_greeter_mock {
+    wiremock_grpc::generate_stub!("hello.Greeter", MockGrpcServer);
+}
+use hello_greeter_mock::*;
 
-// /// The response message containing the greetings
-// #[derive(Clone, PartialEq, ::prost::Message)]
-// pub struct HelloReply {
-//     #[prost(string, tag = "1")]
-//     pub message: ::prost::alloc::string::String,
-// }
+use tonic::Code;
 
-// #[tokio::test]
-// async fn mock_builder() {
-//     let mut server = MockGrpcServer::start_default().await;
+/// The response message containing the greetings
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct HelloReply {
+    #[prost(string, tag = "1")]
+    pub message: ::prost::alloc::string::String,
+}
 
-//     server.setup(
-//         MockBuilder::when()
-//             .path("/")
-//             .then()
-//             .return_status(Code::AlreadyExists),
-//     );
+#[tokio::test]
+async fn mock_builder() {
+    let mut server = MockGrpcServer::start_default().await;
 
-//     server.setup(
-//         MockBuilder::when()
-//             .path("/")
-//             .then()
-//             .return_status(Code::AlreadyExists)
-//             .return_body(|| HelloReply {
-//                 message: "Hello".into(),
-//             }),
-//     );
-// }
+    server.setup(
+        MockBuilder::when()
+            .path("/")
+            .then()
+            .return_status(Code::AlreadyExists),
+    );
+
+    server.setup(
+        MockBuilder::when()
+            .path("/")
+            .then()
+            .return_status(Code::AlreadyExists)
+            .return_body(|| HelloReply {
+                message: "Hello".into(),
+            }),
+    );
+}
