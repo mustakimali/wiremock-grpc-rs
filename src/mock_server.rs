@@ -4,7 +4,11 @@ use std::{
     time::Duration,
 };
 
+use rand::Rng;
+
 use crate::MockBuilder;
+
+/// A running gRPC server
 #[derive(Clone)]
 pub struct MockGrpcServer {
     address: SocketAddr,
@@ -44,7 +48,10 @@ impl MockGrpcServer {
     }
 
     async fn find_unused_port() -> Option<u16> {
-        for port in 50000..60000 {
+        let mut rng = rand::thread_rng();
+
+        loop {
+            let port: u16 = rng.gen_range(50000..60000);
             let addr: SocketAddr = format!("[::1]:{}", port).parse().unwrap();
 
             if !TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_ok() {
@@ -52,7 +59,6 @@ impl MockGrpcServer {
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
-        None
     }
 
     pub async fn start(mut self) -> Self {

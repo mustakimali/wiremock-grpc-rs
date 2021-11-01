@@ -13,6 +13,7 @@ pub trait Mountable {
     fn mount(self, s: &mut MockGrpcServer);
 }
 
+/// Builder pattern to set up a mock response for a given request.
 #[derive(Debug)]
 pub struct MockBuilder {
     pub(crate) path: String,
