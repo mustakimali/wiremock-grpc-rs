@@ -1,5 +1,9 @@
+mod hello_greeter_mock {
+    wiremock_grpc::generate!("hello.Greeter", MockGrpcServer);
+}
+use hello_greeter_mock::*;
+
 use tonic::Code;
-use wiremock_grpc::*;
 
 /// The response message containing the greetings
 #[derive(Clone, PartialEq, ::prost::Message)]

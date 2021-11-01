@@ -1,58 +1,57 @@
 //! # wiremock-grpc-rs
 //! Mock gRPC server to test your outgoing gRPC requests.
 //! # Example
-//! ## Quick start
+//! ## Generate Server Code
+//! For each gRPC server you need to generate codes using the [`generate!`] macro.
 //! ```no_run
-//! use wiremock_grpc::*;
-//! use tonic::transport::Channel;
+//! mod hello_greeter_mock {
+//!   // hello.Greeter: Is the prefix of all rpc
+//!   // MyHelloServer: Arbitrary name of the generated Server
+//!    wiremock_grpc::generate!("hello.Greeter", MyHelloServer);
+//! }
+//! use hello_greeter_mock::*;
+//! // MyHelloServer, MockBuilder are available to use.
+//! // If multiple servers are generated then use the
+//! // module identifier eg. `hello_greeter_mock::MyHelloServer`
+//! ```
 //!
-//! let mut server = tokio_test::block_on(MockGrpcServer::start_default());
-//! server.setup(
+//! ## Use it
+//! ```no_run
+//! #[tokio::test]
+//! async fn handled_when_mock_set() {
+//!     // Server
+//!     let mut server = MyHelloServer::start_default().await;
+//! 
+//!     server.setup(
 //!         MockBuilder::when()
-//!            // one or more conditions
-//!            .path("/")
-//!            .then()
-//!            // one or more mock
-//!            .return_body(||HelloReply {message: "Welcome Mustakim!".into()})
-//! );
-//!
-//! // Client
-//! let channel = Channel::from_shared(format!("http://[::1]:{}", server.address().port()))
-//!     .unwrap()
-//!     .connect()
-//!     .await
-//!     .unwrap();
-//! let mut client = GreeterClient::new(channel);
-//!
-//! // Act
-//! let response = client
-//! .say_hello(HelloRequest {
-//!     name: "Mustakim".into(),
-//! })
-//! .await
-//! .unwrap();
-//!
-//! // Assert
-//! assert_eq!("Welcome Mustakim!", response.into_inner().message);
+//!             .path("/hello.Greeter/SayHello")
+//!             .then()
+//!             .return_status(Code::Ok)
+//!             .return_body(|| HelloReply {
+//!                 message: "Hello Mustakim".into(),
+//!             }),
+//!     );
+//! 
+//!     // Client
+//!     let channel =
+//!         tonic::transport::Channel::from_shared(format!("http://[::1]:{}", server.address().port()))
+//!             .unwrap()
+//!             .connect()
+//!             .await
+//!             .unwrap();
+//!     let mut client = GreeterClient::new(channel);
+//! 
+//!     // Act
+//!     let response = client
+//!         .say_hello(HelloRequest {
+//!             name: "Mustakim".into(),
+//!         })
+//!         .await
+//!         .unwrap();
+//! 
+//!     assert_eq!("Hello Mustakim", response.into_inner().message);
+//! }
 //! ```
-//!
-//! ## Starting the server
-//! There are two ways to start a mock gRPC server.!
-//! ```
-//! use wiremock_grpc_rs::MockGrpcServer;
-//! use std::net::TcpStream;
-//!
-//! // Using a given port
-//! let mut server = tokio_test::block_on(MockGrpcServer::new(5055).start());
-//! assert!(std::net::TcpStream::connect(&server.address()).is_ok());
-//!
-//! // Using an unused port
-//! let mut server = tokio_test::block_on(MockGrpcServer::start_default());
-//! assert!(std::net::TcpStream::connect(&server.address()).is_ok());
-//! ```
-mod builder;
 mod mock_server;
-mod tonic_ext;
 
-pub use builder::{MockBuilder, Mountable, Then};
-pub use mock_server::MockGrpcServer;
+pub use mock_server::*;
