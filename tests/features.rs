@@ -6,8 +6,8 @@ use example::{greeter_client::GreeterClient, *};
 mod my_mock {
     wiremock_grpc::generate!("hello.Greeter", MyMockServer);
 }
-use wiremock_grpc::*;
 use my_mock::*;
+use wiremock_grpc::*;
 
 #[tokio::test]
 async fn it_starts_with_specified_port() {

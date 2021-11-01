@@ -22,8 +22,6 @@ struct Inner {
 
 impl Drop for MockGrpcServer {
     fn drop(&mut self) {
-        println!("MockGrpcServer::Drop");
-
         if let Some(r) = self.inner.as_ref() {
             println!("Terminating server");
             drop(&r.join_handle);

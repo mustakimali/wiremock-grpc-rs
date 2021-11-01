@@ -9,7 +9,7 @@ macro_rules! generate {
             codegen::{http, Body, StdError},
             Code,
         };
-        
+
         use wiremock_grpc::*;
 
         #[derive(Clone)]
@@ -38,7 +38,10 @@ macro_rules! generate {
             type Error = tonic::codegen::Never;
             type Future = tonic::codegen::BoxFuture<Self::Response, Self::Error>;
 
-            fn poll_ready(&mut self, _cx: &mut std::task::Context<'_>) -> Poll<Result<(), Self::Error>> {
+            fn poll_ready(
+                &mut self,
+                _cx: &mut std::task::Context<'_>,
+            ) -> Poll<Result<(), Self::Error>> {
                 Poll::Ready(Ok(()))
             }
 
