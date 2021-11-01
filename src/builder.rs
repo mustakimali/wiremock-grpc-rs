@@ -131,6 +131,7 @@ impl Then for ThenBuilder {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<MockBuilder> for ThenBuilder {
     fn into(self) -> MockBuilder {
         MockBuilder {

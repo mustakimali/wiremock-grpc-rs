@@ -22,9 +22,8 @@ struct Inner {
 
 impl Drop for MockGrpcServer {
     fn drop(&mut self) {
-        if let Some(r) = self.inner.as_ref() {
+        if self.inner.as_ref().is_some() {
             println!("Terminating server");
-            drop(&r.join_handle);
         }
     }
 }
@@ -56,7 +55,7 @@ impl MockGrpcServer {
             let port: u16 = rng.gen_range(50000..60000);
             let addr: SocketAddr = format!("[::1]:{}", port).parse().unwrap();
 
-            if !TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_ok() {
+            if TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_err() {
                 return Some(port);
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
@@ -69,11 +68,6 @@ impl MockGrpcServer {
     {
         println!("Starting gRPC started in {}", self.address());
 
-        // let thread = tokio::spawn(
-        //     tonic::transport::Server::builder()
-        //         .add_service(self.clone())
-        //         .serve(self.address),
-        // );
         let thread = f();
 
         for _ in 0..40 {
