@@ -2,7 +2,7 @@
 //! Mock gRPC server to test your outgoing gRPC requests.
 //! # Example
 //! ## Generate Server Code
-//! For each gRPC server you need to generate codes using the `generate!` macro.
+//! For each gRPC server you need to generate codes using the [`generate!`] macro.
 //! Pass the
 //! ```no_run
 //! mod hello_greeter_mock {
