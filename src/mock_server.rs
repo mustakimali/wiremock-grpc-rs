@@ -4,14 +4,13 @@ use std::{
     time::Duration,
 };
 
-use rand::Rng;
-
 use crate::MockBuilder;
+use rand::Rng;
 
 /// A running gRPC server
 #[derive(Clone)]
 pub struct MockGrpcServer {
-    address: SocketAddr,
+    pub(crate) address: SocketAddr,
     inner: Arc<Option<Inner>>,
     pub(crate) rules: Arc<RwLock<Vec<MockBuilder>>>,
 }
@@ -23,9 +22,8 @@ struct Inner {
 
 impl Drop for MockGrpcServer {
     fn drop(&mut self) {
-        if let Some(r) = self.inner.as_ref() {
+        if self.inner.as_ref().is_some() {
             println!("Terminating server");
-            drop(&r.join_handle);
         }
     }
 }
@@ -39,36 +37,38 @@ impl MockGrpcServer {
         }
     }
 
-    pub async fn start_default() -> Self {
+    pub async fn _start_default<F>(f: F) -> Self
+    where
+        F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
+    {
         let port = MockGrpcServer::find_unused_port()
             .await
             .expect("Unable to find an open port");
 
-        MockGrpcServer::new(port).start().await
+        MockGrpcServer::new(port)._start(f).await
     }
 
-    async fn find_unused_port() -> Option<u16> {
+    pub async fn find_unused_port() -> Option<u16> {
         let mut rng = rand::thread_rng();
 
         loop {
             let port: u16 = rng.gen_range(50000..60000);
             let addr: SocketAddr = format!("[::1]:{}", port).parse().unwrap();
 
-            if !TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_ok() {
+            if TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_err() {
                 return Some(port);
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
     }
 
-    pub async fn start(mut self) -> Self {
+    pub async fn _start<F>(mut self, f: F) -> Self
+    where
+        F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
+    {
         println!("Starting gRPC started in {}", self.address());
 
-        let thread = tokio::spawn(
-            tonic::transport::Server::builder()
-                .add_service(self.clone())
-                .serve(self.address),
-        );
+        let thread = f();
 
         for _ in 0..40 {
             if TcpStream::connect_timeout(&self.address, std::time::Duration::from_millis(25))
@@ -99,8 +99,4 @@ impl MockGrpcServer {
     pub fn address(&self) -> &SocketAddr {
         &self.address
     }
-}
-
-impl tonic::transport::NamedService for MockGrpcServer {
-    const NAME: &'static str = "hello.Greeter";
 }

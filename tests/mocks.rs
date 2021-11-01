@@ -1,4 +1,9 @@
 use tonic::Code;
+
+mod wiremock_gen {
+    wiremock_grpc::generate!("hello.Greeter", MyMockServer);
+}
+use wiremock_gen::*;
 use wiremock_grpc::*;
 
 /// The response message containing the greetings
@@ -10,7 +15,7 @@ pub struct HelloReply {
 
 #[tokio::test]
 async fn mock_builder() {
-    let mut server = MockGrpcServer::start_default().await;
+    let mut server = MyMockServer::start_default().await;
 
     server.setup(
         MockBuilder::when()

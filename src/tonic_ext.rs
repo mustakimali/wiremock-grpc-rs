@@ -1,5 +1,5 @@
 use prost::{bytes::BufMut, Message};
-use std::task::Poll;
+
 use tonic::{
     codec::Codec,
     codegen::{
@@ -11,20 +11,15 @@ use tonic::{
 
 use crate::MockGrpcServer;
 
-impl<B> tonic::codegen::Service<http::Request<B>> for MockGrpcServer
-where
-    B: Body + Send + 'static,
-    B::Error: Into<StdError> + Send + 'static,
-{
-    type Response = http::Response<tonic::body::BoxBody>;
-    type Error = Never;
-    type Future = tonic::codegen::BoxFuture<Self::Response, Self::Error>;
-
-    fn poll_ready(&mut self, _cx: &mut std::task::Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
-    }
-
-    fn call(&mut self, req: http::Request<B>) -> Self::Future {
+impl MockGrpcServer {
+    pub fn handle_request<B>(
+        &self,
+        req: http::Request<B>,
+    ) -> tonic::codegen::BoxFuture<http::Response<tonic::body::BoxBody>, Never>
+    where
+        B: Body + Send + 'static,
+        B::Error: Into<StdError> + Send + 'static,
+    {
         println!("Request to {}", req.uri().path());
 
         let path = req.uri().path();

@@ -1,7 +1,10 @@
 [package]
 name = "wiremock-grpc"
-version = "0.1.0"
+version = "0.0.2-alpha1"
 edition = "2021"
+description = "Mock gRPC server to test your outgoing gRPC requests"
+license = "MIT OR Apache-2.0"
+author = "Mohammad Mustakim Ali <i@mustak.im>"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,3 +17,4 @@ tokio = "1.12.0"
 log = "0.4.14"
 http-body = "0.4.4"
 tokio-test = "0.4.2"
+tower-service = "0.3.1"

@@ -1,27 +1,33 @@
 use std::net::TcpStream;
 
 use tonic::Code;
-use wiremock_grpc::*;
 
 use example::{greeter_client::GreeterClient, *};
+mod wiremock_gen {
+    wiremock_grpc::generate!("hello.Greeter", MyMockServer);
+}
+use wiremock_gen::*;
+use wiremock_grpc::*;
 
 #[tokio::test]
 async fn it_starts_with_specified_port() {
-    let server = MockGrpcServer::new(5055).start().await;
+    let server = MyMockServer::start(5055).await;
 
     assert!(TcpStream::connect(&server.address()).is_ok())
 }
 
 #[tokio::test]
-async fn handled_when_mock_set() {
+async fn default() {
     // Server
-    let mut server = MockGrpcServer::start_default().await;
+    let mut server = MyMockServer::start_default().await;
 
     server.setup(
-        MockBuilder::given("/hello.Greeter/SayHello")
+        MockBuilder::when()
+            .path("/hello.Greeter/SayHello")
+            .then()
             .return_status(Code::Ok)
             .return_body(|| HelloReply {
-                message: "yo".into(),
+                message: "Hello Mustakim".into(),
             }),
     );
 
@@ -37,18 +43,18 @@ async fn handled_when_mock_set() {
     // Act
     let response = client
         .say_hello(HelloRequest {
-            name: "Yo yo".into(),
+            name: "Mustakim".into(),
         })
         .await
         .unwrap();
 
-    assert_eq!("yo", response.into_inner().message);
+    assert_eq!("Hello Mustakim", response.into_inner().message);
 }
 
 #[tokio::test]
 async fn handled_when_mock_set_with_different_status_code() {
     // Server
-    let mut server = MockGrpcServer::start_default().await;
+    let mut server = MyMockServer::start_default().await;
 
     server.setup(
         MockBuilder::given("/hello.Greeter/SayHello")
@@ -82,7 +88,7 @@ async fn handled_when_mock_set_with_different_status_code() {
 #[should_panic]
 async fn panic_when_mock_not_set() {
     // Server
-    let server = MockGrpcServer::start_default().await;
+    let server = MyMockServer::start_default().await;
 
     // no mock is set up
 
@@ -113,6 +119,13 @@ fn create() {
     tonic_build::compile_protos(cd).expect("Unable to generate the code");
 }
 
+/// Generated code from `hello.proto` using `tonic::build`
+/// ```no_run
+/// let cd = std::env::current_dir().unwrap();
+/// std::env::set_var("OUT_DIR", &cd);
+/// let cd = cd.join("hello.proto");
+/// tonic_build::compile_protos(cd).expect("Unable to generate the code");
+/// ```
 mod example {
     /// The request message containing the user's name.
     #[derive(Clone, PartialEq, ::prost::Message)]
