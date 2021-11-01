@@ -1,73 +1,8 @@
 use prost::{bytes::BufMut, Message};
 
-use tonic::{
-    codec::Codec,
-    codegen::{
-        http::{self, HeaderValue},
-        Body, Never, StdError,
-    },
-    Code,
-};
+use tonic::{codec::Codec, Code};
 
-use crate::MockGrpcServer;
-
-impl MockGrpcServer {
-    pub fn handle_request<B>(
-        &self,
-        req: http::Request<B>,
-    ) -> tonic::codegen::BoxFuture<http::Response<tonic::body::BoxBody>, Never>
-    where
-        B: Body + Send + 'static,
-        B::Error: Into<StdError> + Send + 'static,
-    {
-        println!("Request to {}", req.uri().path());
-
-        let path = req.uri().path();
-        let inner = self.rules.as_ref();
-        let inner = inner.read().unwrap();
-
-        if let Some(req_builder) = inner.iter().find(|x| x.path == path) {
-            println!("Matched rule {:?}", req_builder);
-            let code = req_builder.status_code.unwrap_or(Code::Ok);
-
-            if let Some(body) = &req_builder.result {
-                println!("Returning body ({} bytes)", body.len());
-                let body = body.clone();
-
-                let fut = async move {
-                    let method = SvcGeneric(body);
-                    let codec = GenericCodec::default();
-
-                    let mut grpc = tonic::server::Grpc::new(codec);
-                    let mut result = grpc.unary(method, req).await;
-                    result.headers_mut().append(
-                        "grpc-status",
-                        HeaderValue::from_str(format!("{}", code as u32).as_str()).unwrap(),
-                    );
-                    Ok(result)
-                };
-                return Box::pin(fut);
-            } else {
-                let status = code as u32;
-                let builder = http::Response::builder()
-                    .status(200)
-                    .header("content-type", "application/grpc")
-                    .header("grpc-status", format!("{}", status));
-                println!("Returning empty body with status {}", status);
-
-                return Box::pin(async move {
-                    let body = builder.body(tonic::body::empty_body()).unwrap();
-                    Ok(body)
-                });
-            };
-        }
-
-        println!("Request unhandled");
-        panic!("Mock is not setup for {}", path);
-    }
-}
-
-struct SvcGeneric(Vec<u8>);
+pub(crate) struct SvcGeneric(pub(crate) Vec<u8>);
 impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
     type Response = Vec<u8>;
     type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
@@ -79,7 +14,7 @@ impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
     }
 }
 
-struct GenericCodec;
+pub(crate) struct GenericCodec;
 
 impl Default for GenericCodec {
     fn default() -> Self {

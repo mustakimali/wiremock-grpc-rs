@@ -1,4 +1,4 @@
-use crate::MockGrpcServer;
+use crate::{mock_server::RuleItem, MockGrpcServer};
 
 pub trait Then {
     fn return_status(self, status: tonic::Code) -> Self;
@@ -73,7 +73,13 @@ impl Mountable for MockBuilder {
             panic!("Must set the status code or body before attempting to mount the rule.");
         }
 
-        s.rules.write().unwrap().push(self);
+        s.rules
+            .write()
+            .unwrap()
+            .push(std::sync::RwLock::new(RuleItem {
+                match_count: 0,
+                rule: self,
+            }))
     }
 }
 

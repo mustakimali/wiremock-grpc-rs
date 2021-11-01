@@ -9,12 +9,12 @@
 //! }
 //! use wiremock_gen::*;  // this imports generated
 //! use wiremock_grpc::*; // this imports MockBuilder
-//! 
+//!
 //! #[tokio::test]
 //! async fn default() {
 //!     // Server (MyMockServer is generated above)
 //!     let mut server = MyMockServer::start_default().await;
-//! 
+//!
 //!     server.setup(
 //!         MockBuilder::when()
 //!             //    👇 RPC prefix
@@ -25,7 +25,7 @@
 //!                 message: "Hello Mustakim".into(),
 //!             }),
 //!     );
-//! 
+//!
 //!     // Client
 //!     // Client code is generated using tonic_build
 //!     let channel =
@@ -35,7 +35,7 @@
 //!             .await
 //!             .unwrap();
 //!     let mut client = GreeterClient::new(channel);
-//! 
+//!
 //!     // Act
 //!     let response = client
 //!         .say_hello(HelloRequest {
@@ -43,7 +43,7 @@
 //!         })
 //!         .await
 //!         .unwrap();
-//! 
+//!
 //!     assert_eq!("Hello Mustakim", response.into_inner().message);
 //! }
 //! ```
