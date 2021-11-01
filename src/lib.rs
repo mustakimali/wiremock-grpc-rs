@@ -1,4 +1,3 @@
-//! # wiremock-grpc-rs
 //! Mock gRPC server to test your outgoing gRPC requests.
 //! # Example
 //! ## Quick start
