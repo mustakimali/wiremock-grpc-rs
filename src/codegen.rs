@@ -1,3 +1,4 @@
+#[doc = include_str!("../README.md")]
 #[macro_export]
 macro_rules! generate {
     ($prefix:literal, $type: ident) => {
@@ -12,6 +13,16 @@ macro_rules! generate {
 
         use wiremock_grpc::*;
 
+        /// A running gRPC server that binds to service with prefix: `
+        #[doc = $prefix]
+        /// `
+        /// # Example
+        /// ```no_run
+        /// let mut server =
+        #[doc = stringify!($type)]
+        /// ::start_default().await;
+        /// ```
+        /// More documentations in [`crate`]
         #[derive(Clone)]
         pub struct $type(pub(crate) MockGrpcServer);
 
