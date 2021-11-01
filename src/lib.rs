@@ -3,6 +3,7 @@
 //! # Example
 //! ## Quick start
 //! ```no_run
+//! use wiremock_grpc::*;
 //! use tonic::transport::Channel;
 //!
 //! let mut server = tokio_test::block_on(MockGrpcServer::start_default());
