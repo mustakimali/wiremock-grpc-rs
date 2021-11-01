@@ -1,5 +1,5 @@
 use tonic::Code;
-use wiremock_grpc_rs::*;
+use wiremock_grpc::*;
 
 /// The response message containing the greetings
 #[derive(Clone, PartialEq, ::prost::Message)]

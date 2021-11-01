@@ -1,5 +1,5 @@
 [package]
-name = "wiremock-grpc-rs"
+name = "wiremock-grpc"
 version = "0.1.0"
 edition = "2021"
 

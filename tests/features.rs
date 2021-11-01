@@ -1,7 +1,7 @@
 use std::net::TcpStream;
 
 use tonic::Code;
-use wiremock_grpc_rs::*;
+use wiremock_grpc::*;
 
 use example::{greeter_client::GreeterClient, *};
 
