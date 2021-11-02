@@ -2,10 +2,7 @@ use std::{
     ops::{Deref, DerefMut},
     task::Poll,
 };
-use tonic::{
-    codegen::{http, Body, StdError},
-    Code,
-};
+use tonic::{codegen::http, Code};
 
 use wiremock_grpc::*;
 
@@ -82,7 +79,7 @@ impl Server {
         let grpc_serve = MockGrpcServer::new(port);
         let address = grpc_serve.address().clone();
         let grpc_server = grpc_serve
-            .start(|| {
+            ._start(|| {
                 tokio::spawn(
                     tonic::transport::Server::builder()
                         .add_service(self.clone())

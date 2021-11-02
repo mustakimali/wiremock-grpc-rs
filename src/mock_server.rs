@@ -33,6 +33,7 @@ pub(crate) struct RuleItem {
 
 /// Represent a single handled request to the mock server
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct RequestItem {
     headers: HeaderMap,
     method: Method,

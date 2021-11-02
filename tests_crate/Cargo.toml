@@ -7,6 +7,5 @@ edition = "2021"
 
 [dependencies]
 tokio = "1.12.0"
-wiremock-grpc = {path = "../"}
-tonic = "0.6.0"
-http-body = "0.4.4"
+#wiremock-grpc = {path = "../"}
+wiremock-grpc = "0.0.2-alpha6"

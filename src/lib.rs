@@ -61,3 +61,6 @@ mod tonic_ext;
 
 pub use builder::{MockBuilder, Mountable, Then};
 pub use mock_server::MockGrpcServer;
+
+pub extern crate http_body;
+pub extern crate tonic;

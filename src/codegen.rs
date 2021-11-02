@@ -2,13 +2,13 @@
 #[macro_export]
 macro_rules! generate {
     ($prefix:literal, $type: ident) => {
+        use ::wiremock_grpc::tonic::{
+            codegen::{http, Body, StdError},
+            Code,
+        };
         use std::{
             ops::{Deref, DerefMut},
             task::Poll,
-        };
-        use tonic::{
-            codegen::{http, Body, StdError},
-            Code,
         };
 
         use wiremock_grpc::*;
@@ -42,7 +42,7 @@ macro_rules! generate {
 
         impl<B> tonic::codegen::Service<tonic::codegen::http::Request<B>> for $type
         where
-            B: http_body::Body + Send + 'static,
+            B: ::wiremock_grpc::http_body::Body + Send + 'static,
             B::Error: Into<tonic::codegen::StdError> + Send + 'static,
         {
             type Response = tonic::codegen::http::Response<tonic::body::BoxBody>;
