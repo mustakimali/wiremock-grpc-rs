@@ -16,6 +16,16 @@ use tonic::{
 };
 
 /// A running gRPC server
+/// You do not directly create this object instead use the
+/// macro generated server to instantiate this for you.
+/// ```no_run
+/// mod mock_server {
+///     wiremock_grpc::generate!("hello.Greeter", MyServer);
+/// }
+/// use mock_server::*;
+/// ```
+/// `MyServer` also [`Deref`] to `MockGrpcServer`.
+/// Therefore you can call `setup()` / `find()` functions on it.
 #[derive(Clone)]
 pub struct MockGrpcServer {
     pub(crate) address: SocketAddr,
@@ -31,13 +41,12 @@ pub(crate) struct RuleItem {
     pub(crate) invocations: Vec<RequestItem>,
 }
 
-/// Represent a single handled request to the mock server
+/// Represent a single handled request to the mock server.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct RequestItem {
-    headers: HeaderMap,
-    method: Method,
-    uri: String,
+    pub headers: HeaderMap,
+    pub method: Method,
+    pub uri: String,
 }
 
 impl RuleItem {
@@ -75,17 +84,6 @@ impl MockGrpcServer {
             inner: Arc::default(),
             rules: Arc::default(),
         }
-    }
-
-    pub async fn _start_default<F>(f: F) -> Self
-    where
-        F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
-    {
-        let port = MockGrpcServer::find_unused_port()
-            .await
-            .expect("Unable to find an open port");
-
-        MockGrpcServer::new(port)._start(f).await
     }
 
     pub async fn find_unused_port() -> Option<u16> {

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
     mod mock_server {
-        wiremock_grpc::generate!("", MyServer);
+        wiremock_grpc::generate!("hello.Greeter", MyServer);
     }
     use mock_server::*;
 

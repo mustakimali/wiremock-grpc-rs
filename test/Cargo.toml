@@ -9,5 +9,5 @@ doc =  false
 
 [dependencies]
 tokio = "1.12.0"
-#wiremock-grpc = {path = "../"}
-wiremock-grpc = "0.0.2-alpha6"
+wiremock-grpc = {path = "../lib/"}
+#wiremock-grpc = "0.0.2-alpha6"
