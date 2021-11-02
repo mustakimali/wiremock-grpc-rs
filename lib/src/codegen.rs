@@ -66,6 +66,14 @@ macro_rules! generate {
         }
 
         impl $type {
+            /// Start the server and listens to an available port.
+            /// 
+            /// The port can be accesed using `address()`
+            /// ```no_run
+            /// let server = MyMockServer::start_default();
+            /// let address = server.address();
+            /// let port : u16 = address.port();
+            /// ```
             pub async fn start_default() -> Self {
                 let port = MockGrpcServer::find_unused_port()
                     .await
@@ -74,6 +82,10 @@ macro_rules! generate {
                 Self(MockGrpcServer::new(port)).start_internal(port).await
             }
 
+            /// Start the server with a specified port.
+            /// 
+            /// ## Panics
+            /// * When the the port is not available.
             pub async fn start(port: u16) -> Self {
                 Self(MockGrpcServer::new(port)).start_internal(port).await
             }

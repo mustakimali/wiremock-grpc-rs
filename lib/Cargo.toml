@@ -1,14 +1,12 @@
 [package]
 name = "wiremock-grpc"
-version = "0.0.2-alpha6"
+version = "0.0.2-alpha7"
 edition = "2021"
 description = "Mock gRPC server to test your outgoing gRPC requests"
 license = "MIT OR Apache-2.0"
 authors = ["Mohammad Mustakim Ali <i@mustak.im>"]
 documentation = "https://docs.rs/wiremock-grpc/"
 categories = ["development-tools"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 tonic = "0.6.0"
