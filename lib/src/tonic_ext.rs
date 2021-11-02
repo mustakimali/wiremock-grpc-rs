@@ -46,14 +46,9 @@ impl tonic::codec::Encoder for GenericProstEncoder {
         item: Self::Item,
         buf: &mut tonic::codec::EncodeBuf<'_>,
     ) -> Result<(), Self::Error> {
-        // construct the BytesMut from the Vec<u8>
-        let mut b = prost::bytes::BytesMut::new();
-        for i in item {
-            b.put_u8(i);
-        }
 
-        // copy to buffer
-        for i in b {
+        // copy the respone body `item` to the buffer
+        for i in item {
             buf.put_u8(i);
         }
 
