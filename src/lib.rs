@@ -14,8 +14,8 @@
 //! async fn default() {
 //!     // Server (MyMockServer is generated above)
 //!     let mut server = MyMockServer::start_default().await;
-//!
-//!     server.setup(
+//! 
+//!     let request1 = server.setup(
 //!         MockBuilder::when()
 //!             //    👇 RPC prefix
 //!             .path("/hello.Greeter/SayHello")
@@ -24,8 +24,8 @@
 //!             .return_body(|| HelloReply {
 //!                 message: "Hello Mustakim".into(),
 //!             }),
-//!     );
-//!
+//!     ); // request1 can be used later to inspect the request
+//! 
 //!     // Client
 //!     // Client code is generated using tonic_build
 //!     let channel =
@@ -35,7 +35,7 @@
 //!             .await
 //!             .unwrap();
 //!     let mut client = GreeterClient::new(channel);
-//!
+//! 
 //!     // Act
 //!     let response = client
 //!         .say_hello(HelloRequest {
@@ -43,13 +43,19 @@
 //!         })
 //!         .await
 //!         .unwrap();
-//!
+//! 
 //!     assert_eq!("Hello Mustakim", response.into_inner().message);
+//! 
+//!     // Inspect the request
+//!     let requests = server.find(request1);
+//!     assert!(requests.is_some(), "Request must be logged");
+//!     assert_eq!(1, requests.unwrap().len(), "Only 1 request must be logged");
 //! }
 //! ```
 
 mod builder;
 mod codegen;
+mod invocations;
 mod mock_server;
 mod tonic_ext;
 

@@ -14,13 +14,14 @@ pub trait Mountable {
 }
 
 /// Builder pattern to set up a mock response for a given request.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MockBuilder {
     pub(crate) path: String,
     pub(crate) status_code: Option<tonic::Code>,
     pub(crate) result: Option<Vec<u8>>,
 }
 
+#[derive(Clone)]
 pub struct WhenBuilder {
     path: Option<String>,
 }
@@ -47,10 +48,11 @@ impl WhenBuilder {
     }
 }
 
+#[derive(Clone)]
 pub struct ThenBuilder {
-    path: String,
-    status_code: Option<tonic::Code>,
-    result: Option<Vec<u8>>,
+    pub(crate) path: String,
+    pub(crate) status_code: Option<tonic::Code>,
+    pub(crate) result: Option<Vec<u8>>,
 }
 
 impl MockBuilder {
@@ -77,7 +79,8 @@ impl Mountable for MockBuilder {
             .write()
             .unwrap()
             .push(std::sync::RwLock::new(RuleItem {
-                match_count: 0,
+                invocations_count: 0,
+                invocations: Vec::default(),
                 rule: self,
             }))
     }

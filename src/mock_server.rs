@@ -9,7 +9,7 @@ use crate::MockBuilder;
 use rand::Rng;
 use tonic::{
     codegen::{
-        http::{self, HeaderValue},
+        http::{self, HeaderMap, HeaderValue, Method},
         Body, Never, StdError,
     },
     Code,
@@ -25,13 +25,32 @@ pub struct MockGrpcServer {
 
 #[derive(Debug)]
 pub(crate) struct RuleItem {
-    pub(crate) match_count: u32,
     pub(crate) rule: MockBuilder,
+
+    pub(crate) invocations_count: u32,
+    pub(crate) invocations: Vec<RequestItem>,
+}
+
+/// Represent a single handled request to the mock server
+#[derive(Debug, Clone)]
+pub struct RequestItem {
+    headers: HeaderMap,
+    method: Method,
+    uri: String,
 }
 
 impl RuleItem {
-    fn record_request(&mut self) {
-        self.match_count += 1;
+    fn record_request<B>(&mut self, r: &http::Request<B>)
+    where
+        B: Body + Send + 'static,
+        B::Error: Into<StdError> + Send + 'static,
+    {
+        self.invocations_count += 1;
+        self.invocations.push(RequestItem {
+            headers: r.headers().clone(),
+            method: r.method().clone(),
+            uri: r.uri().to_string(),
+        })
     }
 }
 
@@ -107,13 +126,18 @@ impl MockGrpcServer {
         self
     }
 
-    pub fn setup<M>(&mut self, r: M) -> MockGrpcServer
+    pub fn setup<M>(&mut self, r: M) -> MockBuilder
     where
-        M: crate::Then + crate::Mountable,
+        M: Into<MockBuilder> + Clone + crate::Mountable,
     {
-        r.mount(self);
+        r.clone().mount(self);
 
-        self.to_owned()
+        r.into()
+    }
+
+    /// Reset all mappings
+    pub fn reset(&self) {
+        self.rules.write().unwrap().clear();
     }
 
     pub fn address(&self) -> &SocketAddr {
@@ -136,7 +160,7 @@ impl MockGrpcServer {
 
         if let Some(item) = inner.iter().find(|x| x.read().unwrap().rule.path == path) {
             println!("Matched rule {:?}", item);
-            item.write().unwrap().record_request();
+            item.write().unwrap().record_request(&req);
 
             let item = item.read().unwrap();
             let code = item.rule.status_code.unwrap_or(Code::Ok);
