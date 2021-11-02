@@ -42,8 +42,8 @@ macro_rules! generate {
 
         impl<B> tonic::codegen::Service<tonic::codegen::http::Request<B>> for $type
         where
-            B: Body + Send + 'static,
-            B::Error: Into<StdError> + Send + 'static,
+            B: http_body::Body + Send + 'static,
+            B::Error: Into<tonic::codegen::StdError> + Send + 'static,
         {
             type Response = tonic::codegen::http::Response<tonic::body::BoxBody>;
             type Error = tonic::codegen::Never;
@@ -56,7 +56,7 @@ macro_rules! generate {
                 Poll::Ready(Ok(()))
             }
 
-            fn call(&mut self, req: http::Request<B>) -> Self::Future {
+            fn call(&mut self, req: tonic::codegen::http::Request<B>) -> Self::Future {
                 self.0.handle_request(req)
             }
         }

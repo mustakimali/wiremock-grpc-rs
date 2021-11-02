@@ -1,6 +1,6 @@
 [package]
 name = "wiremock-grpc"
-version = "0.0.2-alpha4"
+version = "0.0.2-alpha5"
 edition = "2021"
 description = "Mock gRPC server to test your outgoing gRPC requests"
 license = "MIT OR Apache-2.0"
@@ -14,6 +14,7 @@ tonic-build = "0.6.0"
 rand = "0.8.4"
 prost = "0.9.0"
 tokio = "1.12.0"
+http-body = "0.4.4"
 
 [dev-dependenies]
 tokio-test = "0.4.2"
