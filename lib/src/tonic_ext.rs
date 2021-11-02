@@ -46,7 +46,6 @@ impl tonic::codec::Encoder for GenericProstEncoder {
         item: Self::Item,
         buf: &mut tonic::codec::EncodeBuf<'_>,
     ) -> Result<(), Self::Error> {
-
         // copy the respone body `item` to the buffer
         for i in item {
             buf.put_u8(i);

@@ -1,0 +1,14 @@
+[package]
+name = "wiremock-grpc-protogen"
+version = "0.1.0"
+edition = "2021"
+description = "Proto generated client-server code"
+publish = false
+
+[lib]
+doc =  false
+
+[dependencies]
+tonic = "0.6.0"
+tonic-build = "0.6.0"
+prost = "0.9.0"

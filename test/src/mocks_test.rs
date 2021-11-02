@@ -3,15 +3,10 @@ use tonic::Code;
 mod wiremock_gen {
     wiremock_grpc::generate!("hello.Greeter", MyMockServer);
 }
+
 use wiremock_gen::*;
 use wiremock_grpc::*;
-
-/// The response message containing the greetings
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct HelloReply {
-    #[prost(string, tag = "1")]
-    pub message: ::prost::alloc::string::String,
-}
+use wiremock_grpc_protogen::HelloReply;
 
 #[tokio::test]
 async fn mock_builder() {

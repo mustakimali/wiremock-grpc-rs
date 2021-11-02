@@ -1,14 +1,6 @@
-#[cfg(test)]
-mod test {
-    mod mock_server {
-        wiremock_grpc::generate!("hello.Greeter", MyServer);
-    }
-    use mock_server::*;
-
-    #[tokio::test]
-    async fn it_works() {
-        let server = MyServer::start_default().await;
-
-        assert!(std::net::TcpStream::connect(&server.address()).is_ok())
-    }
-}
+#[allow(unused_imports)]
+mod features_test;
+#[allow(unused_imports)]
+mod mocks_test;
+#[allow(unused_imports, dead_code)]
+mod codegen_test;

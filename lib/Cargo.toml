@@ -12,11 +12,7 @@ categories = ["development-tools"]
 
 [dependencies]
 tonic = "0.6.0"
-tonic-build = "0.6.0"
 rand = "0.8.4"
 prost = "0.9.0"
 tokio = "1.12.0"
 http-body = "0.4.4"
-
-[dev-dependenies]
-tokio-test = "0.4.2"

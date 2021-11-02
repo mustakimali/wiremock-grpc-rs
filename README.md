@@ -28,5 +28,6 @@
 <br/>
 
 
-* [Library](lib/)
-* [Integration Test](test/)
+* [lib/](lib/) - The actual crate that gets published to crates.io
+* [test/](test/) - Integration tests
+* [protogen/](protogen/) - Proto generated client-server code used in test
