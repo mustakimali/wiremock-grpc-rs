@@ -53,9 +53,20 @@ async fn default() {
     assert_eq!("Hello Mustakim", response.into_inner().message);
 
     // Inspect the request
-    let requests = server.find(request1);
+    // multiple requests
+    let requests = server.find(&request1);
     assert!(requests.is_some(), "Request must be logged");
     assert_eq!(1, requests.unwrap().len(), "Only 1 request must be logged");
+
+    // single request
+    let request = server.find_one(&request1);
+    assert_eq!(
+        format!(
+            "http://[::1]:{}/hello.Greeter/SayHello",
+            server.address().port()
+        ),
+        request.uri
+    );
 }
 
 #[tokio::test]

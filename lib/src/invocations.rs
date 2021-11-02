@@ -1,10 +1,15 @@
 use crate::{mock_server::RequestItem, MockBuilder, MockGrpcServer};
 
 impl MockGrpcServer {
-    pub fn find(&self, r: MockBuilder) -> Option<Vec<RequestItem>> {
+    /// Finds one or more matched requests for a given request builder.
+    ///
+    /// ## Returns
+    /// * [`None`]: when the given [`MockBuilder`] is not registered using the `setup()` function.
+    /// * Empty Vector: when no request was made that matches the builder,
+    pub fn find(&self, r: &MockBuilder) -> Option<Vec<RequestItem>> {
         for item in self.rules.read().unwrap().iter() {
             let item = item.read().unwrap();
-            if item.rule == r {
+            if &item.rule == r {
                 let mut result = Vec::default();
                 for i in &item.invocations {
                     result.push(i.clone());
@@ -13,7 +18,26 @@ impl MockGrpcServer {
             }
         }
 
-        return None;
+        None
+    }
+
+    /// Finds a single matched request for a given criteria
+    ///
+    /// ## Panics
+    /// * No request matching the criteria (eg. No request receieved by the mock server)
+    /// * When more than one request matches the criteria (in this case use [`find`])
+    /// * When the criteria is inavlid (not registered with the server using the `setup()` function),
+    pub fn find_one(&self, r: &MockBuilder) -> RequestItem {
+        if let Some(m) = self.find(r) {
+            match m.len() {
+                0 => panic!("No request maching the given criteria."),
+                d if d > 1 => panic!("More then one request matching the criteria."),
+                1 => m[0].clone(),
+                _ => todo!(),
+            }
+        } else {
+            panic!("The given MockBuilder is not registered with the mock server.");
+        }
     }
 }
 

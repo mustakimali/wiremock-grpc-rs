@@ -2,8 +2,8 @@ use prost::{bytes::BufMut, Message};
 
 use tonic::{codec::Codec, Code};
 
-pub(crate) struct SvcGeneric(pub(crate) Vec<u8>);
-impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
+pub(crate) struct GenericSvc(pub(crate) Vec<u8>);
+impl tonic::server::UnaryService<Vec<u8>> for GenericSvc {
     type Response = Vec<u8>;
     type Future = tonic::codegen::BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
     fn call(&mut self, _: tonic::Request<Vec<u8>>) -> Self::Future {
@@ -14,13 +14,8 @@ impl tonic::server::UnaryService<Vec<u8>> for SvcGeneric {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct GenericCodec;
-
-impl Default for GenericCodec {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 impl Codec for GenericCodec {
     type Encode = Vec<u8>;

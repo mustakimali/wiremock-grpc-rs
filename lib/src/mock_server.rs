@@ -4,7 +4,7 @@ use std::{
     time::Duration,
 };
 
-use crate::tonic_ext::{GenericCodec, SvcGeneric};
+use crate::tonic_ext::{GenericCodec, GenericSvc};
 use crate::MockBuilder;
 use rand::Rng;
 use tonic::{
@@ -168,7 +168,7 @@ impl MockGrpcServer {
                 let body = body.clone();
 
                 let fut = async move {
-                    let method = SvcGeneric(body);
+                    let method = GenericSvc(body);
                     let codec = GenericCodec::default();
 
                     let mut grpc = tonic::server::Grpc::new(codec);
