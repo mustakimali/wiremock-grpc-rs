@@ -1,4 +1,4 @@
-use crate::{mock_server::RuleItem, MockGrpcServer};
+use crate::{grpc_server::RuleItem, GrpcServer};
 
 pub trait Then {
     fn return_status(self, status: tonic::Code) -> Self;
@@ -10,7 +10,7 @@ pub trait Then {
 }
 
 pub trait Mountable {
-    fn mount(self, s: &mut MockGrpcServer);
+    fn mount(self, s: &mut GrpcServer);
 }
 
 /// Builder pattern to set up a mock response for a given request.
@@ -70,7 +70,7 @@ impl MockBuilder {
 }
 
 impl Mountable for MockBuilder {
-    fn mount(self, s: &mut MockGrpcServer) {
+    fn mount(self, s: &mut GrpcServer) {
         if self.status_code.is_none() && self.result.is_none() {
             panic!("Must set the status code or body before attempting to mount the rule.");
         }
@@ -152,7 +152,7 @@ impl Into<MockBuilder> for ThenBuilder {
 }
 
 impl Mountable for ThenBuilder {
-    fn mount(self, s: &mut MockGrpcServer) {
+    fn mount(self, s: &mut GrpcServer) {
         let rb: MockBuilder = self.into();
 
         rb.mount(s)

@@ -24,10 +24,10 @@ macro_rules! generate {
         /// ```
         /// More documentations in [`crate`]
         #[derive(Clone)]
-        pub struct $type(pub(crate) MockGrpcServer);
+        pub struct $type(pub(crate) GrpcServer);
 
         impl Deref for $type {
-            type Target = MockGrpcServer;
+            type Target = GrpcServer;
 
             fn deref(&self) -> &Self::Target {
                 &self.0
@@ -75,11 +75,11 @@ macro_rules! generate {
             /// let port : u16 = address.port();
             /// ```
             pub async fn start_default() -> Self {
-                let port = MockGrpcServer::find_unused_port()
+                let port = GrpcServer::find_unused_port()
                     .await
                     .expect("Unable to find an open port");
 
-                Self(MockGrpcServer::new(port)).start_internal().await
+                Self(GrpcServer::new(port)).start_internal().await
             }
 
             /// Start the server with a specified port.
@@ -87,7 +87,7 @@ macro_rules! generate {
             /// ## Panics
             /// * When the the port is not available.
             pub async fn start(port: u16) -> Self {
-                Self(MockGrpcServer::new(port)).start_internal().await
+                Self(GrpcServer::new(port)).start_internal().await
             }
 
             async fn start_internal(&mut self) -> Self {

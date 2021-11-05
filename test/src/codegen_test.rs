@@ -21,10 +21,10 @@ async fn codegen_works() {
 // GEN CODES    |
 //---------------
 #[derive(Clone)]
-pub struct Server(pub(crate) MockGrpcServer);
+pub struct Server(pub(crate) GrpcServer);
 
 impl Deref for Server {
-    type Target = MockGrpcServer;
+    type Target = GrpcServer;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -61,15 +61,15 @@ impl tonic::transport::NamedService for Server {
 
 impl Server {
     pub async fn start_default() -> Self {
-        let port = MockGrpcServer::find_unused_port()
+        let port = GrpcServer::find_unused_port()
             .await
             .expect("Unable to find an open port");
 
-        Self(MockGrpcServer::new(port)).start_internal().await
+        Self(GrpcServer::new(port)).start_internal().await
     }
 
     pub async fn start(port: u16) -> Self {
-        Self(MockGrpcServer::new(port)).start_internal().await
+        Self(GrpcServer::new(port)).start_internal().await
     }
 
     async fn start_internal(&mut self) -> Self {

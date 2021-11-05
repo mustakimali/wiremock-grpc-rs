@@ -1,6 +1,6 @@
-use crate::{mock_server::RequestItem, MockBuilder, MockGrpcServer};
+use crate::{grpc_server::RequestItem, MockBuilder, GrpcServer};
 
-impl MockGrpcServer {
+impl GrpcServer {
     /// Finds one or more matched requests for a given request builder.
     ///
     /// ## Returns

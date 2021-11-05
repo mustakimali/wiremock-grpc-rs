@@ -67,11 +67,11 @@
 mod builder;
 mod codegen;
 mod invocations;
-mod mock_server;
+mod grpc_server;
 mod tonic_ext;
 
 pub use builder::{MockBuilder, Mountable, Then};
-pub use mock_server::MockGrpcServer;
+pub use grpc_server::GrpcServer;
 
 pub extern crate http_body;
 pub extern crate tonic;

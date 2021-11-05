@@ -28,7 +28,7 @@ use tonic::{
 /// `MyServer` also [`Deref`] to `MockGrpcServer`.
 /// Therefore you can call `setup()` / `find()` functions on it.
 #[derive(Clone, Debug)]
-pub struct MockGrpcServer {
+pub struct GrpcServer {
     pub(crate) address: SocketAddr,
     inner: Arc<Option<Inner>>,
     pub(crate) rules: Arc<RwLock<Vec<RwLock<RuleItem>>>>,
@@ -68,10 +68,10 @@ impl RuleItem {
 #[derive(Debug)]
 struct Inner {
     #[allow(dead_code)]
-    join_handle: tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
+    server_handle: tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
 }
 
-impl Drop for MockGrpcServer {
+impl Drop for GrpcServer {
     fn drop(&mut self) {
         debug!("dropping server {:?}", self);
 
@@ -98,7 +98,7 @@ impl Drop for MockGrpcServer {
     }
 }
 
-impl MockGrpcServer {
+impl GrpcServer {
     pub fn new(port: u16) -> Self {
         Self {
             address: format!("[::1]:{}", port).parse().unwrap(),
@@ -139,7 +139,7 @@ impl MockGrpcServer {
         }
 
         self.inner = Arc::new(Some(Inner {
-            join_handle: thread,
+            server_handle: thread,
         }));
 
         info!("Server started in {}", self.address());
