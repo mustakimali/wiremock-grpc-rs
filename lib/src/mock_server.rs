@@ -27,7 +27,7 @@ use tonic::{
 /// ```
 /// `MyServer` also [`Deref`] to `MockGrpcServer`.
 /// Therefore you can call `setup()` / `find()` functions on it.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MockGrpcServer {
     pub(crate) address: SocketAddr,
     inner: Arc<Option<Inner>>,
@@ -65,6 +65,7 @@ impl RuleItem {
     }
 }
 
+#[derive(Debug)]
 struct Inner {
     #[allow(dead_code)]
     join_handle: tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
@@ -72,8 +73,27 @@ struct Inner {
 
 impl Drop for MockGrpcServer {
     fn drop(&mut self) {
+        debug!("dropping server {:?}", self);
+
         if self.inner.as_ref().is_some() {
             info!("Terminating server");
+
+            if self.rules_len() > 0 && self.rules_unmatched() > 0 {
+                let unmatched_paths = self
+                    .rules
+                    .read()
+                    .unwrap()
+                    .iter()
+                    .filter(|f| f.read().unwrap().invocations_count == 0)
+                    .map(|f| f.read().unwrap().rule.path.clone())
+                    .collect::<Vec<String>>();
+
+                self.reset();
+                panic!(
+                    "Server terminated with unmatched rules: \n{}",
+                    unmatched_paths.join("\n")
+                );
+            }
         }
     }
 }
@@ -101,13 +121,13 @@ impl MockGrpcServer {
         }
     }
 
-    pub async fn _start<F>(mut self, f: F) -> Self
-    where
-        F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
-    {
+    pub async fn _start(
+        &mut self,
+        f: tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
+    ) {
         info!("Starting gRPC started in {}", self.address());
 
-        let thread = f();
+        let thread = f;
 
         for _ in 0..40 {
             if TcpStream::connect_timeout(&self.address, std::time::Duration::from_millis(25))
@@ -123,7 +143,6 @@ impl MockGrpcServer {
         }));
 
         info!("Server started in {}", self.address());
-        self
     }
 
     pub fn setup<M>(&mut self, r: M) -> MockBuilder

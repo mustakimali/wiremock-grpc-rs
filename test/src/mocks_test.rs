@@ -9,6 +9,7 @@ use wiremock_grpc::*;
 use wiremock_grpc_protogen::HelloReply;
 
 #[tokio::test]
+#[should_panic]
 async fn mock_builder() {
     let mut server = MyMockServer::start_default().await;
 

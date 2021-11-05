@@ -41,13 +41,28 @@ impl MockGrpcServer {
     }
 
     /// Returns number of handled requests
-    pub fn find_request_count(&self) -> usize {
+    pub fn find_request_count(&self) -> u32 {
         let mut count = 0;
         for item in self.rules.read().unwrap().iter() {
             let item = item.read().unwrap();
-            count += item.invocations.len();
+            count += item.invocations_count;
         }
         count
+    }
+
+    /// Return number of rules registered with the server
+    pub fn rules_len(&self) -> usize {
+        self.rules.read().unwrap().iter().len()
+    }
+
+    /// Return number of umatched so far
+    pub fn rules_unmatched(&self) -> usize {
+        self.rules
+            .read()
+            .unwrap()
+            .iter()
+            .filter(|f| f.read().unwrap().invocations_count == 0)
+            .count()
     }
 }
 

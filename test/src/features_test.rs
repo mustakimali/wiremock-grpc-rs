@@ -157,6 +157,30 @@ async fn multiple_mocks() {
     assert_eq!(2, server.find_request_count());
 }
 
+#[tokio::test]
+#[should_panic]
+async fn unmatched_request_panics() {
+    let (mut server, _) = create().await;
+
+    // setup
+    server.setup(
+        MockBuilder::when()
+            .path("/hello.Greeter/SayHello")
+            .then()
+            .return_body(|| HelloReply {
+                message: "Hello to you too!".into(),
+            }),
+    );
+
+    // Act
+    // dont send any request
+
+    assert_eq!(0, server.find_request_count());
+    assert_eq!(1, server.rules_len());
+    assert_eq!(1, server.rules_unmatched());
+} // panics
+
+#[allow(dead_code)]
 async fn create() -> (MyMockServer, GreeterClient<Channel>) {
     let server = MyMockServer::start_default().await;
 

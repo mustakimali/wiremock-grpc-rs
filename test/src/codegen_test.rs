@@ -8,14 +8,7 @@ use wiremock_grpc::*;
 
 #[tokio::test]
 async fn codegen_works() {
-    let mut server = Server::start_default().await;
-
-    server.setup(
-        MockBuilder::when()
-            .path("")
-            .then()
-            .return_status(Code::Aborted),
-    );
+    let server = Server::start_default().await;
 
     assert!(std::net::TcpStream::connect(&server.address()).is_ok())
 }
@@ -72,22 +65,22 @@ impl Server {
             .await
             .expect("Unable to find an open port");
 
-        Self(MockGrpcServer::new(port)).start(port).await
+        Self(MockGrpcServer::new(port)).start_internal().await
     }
 
-    pub async fn start(&self, port: u16) -> Self {
-        let grpc_serve = MockGrpcServer::new(port);
-        let address = grpc_serve.address().clone();
-        let grpc_server = grpc_serve
-            ._start(|| {
-                tokio::spawn(
-                    tonic::transport::Server::builder()
-                        .add_service(self.clone())
-                        .serve(address),
-                )
-            })
-            .await;
-        Self(grpc_server)
+    pub async fn start(port: u16) -> Self {
+        Self(MockGrpcServer::new(port)).start_internal().await
+    }
+
+    async fn start_internal(&mut self) -> Self {
+        let address = self.address().clone();
+        let thread = tokio::spawn(
+            tonic::transport::Server::builder()
+                .add_service(self.clone())
+                .serve(address),
+        );
+        self._start(thread).await;
+        self.to_owned()
     }
 }
 

@@ -79,7 +79,7 @@ macro_rules! generate {
                     .await
                     .expect("Unable to find an open port");
 
-                Self(MockGrpcServer::new(port)).start_internal(port).await
+                Self(MockGrpcServer::new(port)).start_internal().await
             }
 
             /// Start the server with a specified port.
@@ -87,21 +87,17 @@ macro_rules! generate {
             /// ## Panics
             /// * When the the port is not available.
             pub async fn start(port: u16) -> Self {
-                Self(MockGrpcServer::new(port)).start_internal(port).await
+                Self(MockGrpcServer::new(port)).start_internal().await
             }
 
-            async fn start_internal(&self, port: u16) -> Self {
-                let grpc_serve = MockGrpcServer::new(port);
-                let address = grpc_serve.address().clone();
-                let grpc_server = grpc_serve
-                    ._start(|| {
-                        tokio::spawn(
-                            tonic::transport::Server::builder()
-                                .add_service(self.clone())
-                                .serve(address),
-                        )
-                    })
-                    .await;
+            async fn start_internal(&mut self) -> Self {
+                let address = self.address().clone();
+                let thread = tokio::spawn(
+                    tonic::transport::Server::builder()
+                        .add_service(self.clone())
+                        .serve(address),
+                );
+                self._start(thread).await;
                 self.to_owned()
             }
         }
