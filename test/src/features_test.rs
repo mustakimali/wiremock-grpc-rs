@@ -98,20 +98,21 @@ async fn handled_when_mock_set_with_different_status_code() {
 }
 
 #[tokio::test]
-#[should_panic]
-async fn panic_when_mock_not_set() {
+async fn unimplemented_when_mock_not_set() {
     // Server
     let (_, mut client) = create().await;
 
     // no mock is set up
 
     // Act
-    let _ = client
+    let response = client
         .say_hello(HelloRequest {
             name: "Yo yo".into(),
         })
-        .await
-        .expect("Must panic");
+        .await;
+
+    assert!(response.is_err());
+    assert_eq!(Code::Unimplemented, response.err().unwrap().code());
 }
 
 #[tokio::test]

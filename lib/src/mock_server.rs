@@ -1,3 +1,4 @@
+use log::{debug, info, warn};
 use std::{
     net::{SocketAddr, TcpStream},
     sync::{Arc, RwLock},
@@ -72,7 +73,7 @@ struct Inner {
 impl Drop for MockGrpcServer {
     fn drop(&mut self) {
         if self.inner.as_ref().is_some() {
-            println!("Terminating server");
+            info!("Terminating server");
         }
     }
 }
@@ -104,7 +105,7 @@ impl MockGrpcServer {
     where
         F: Fn() -> tokio::task::JoinHandle<Result<(), tonic::transport::Error>>,
     {
-        println!("Starting gRPC started in {}", self.address());
+        info!("Starting gRPC started in {}", self.address());
 
         let thread = f();
 
@@ -121,7 +122,7 @@ impl MockGrpcServer {
             join_handle: thread,
         }));
 
-        println!("Server started in {}", self.address());
+        info!("Server started in {}", self.address());
         self
     }
 
@@ -151,20 +152,20 @@ impl MockGrpcServer {
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
-        println!("Request to {}", req.uri().path());
+        info!("Request to {}", req.uri().path());
 
         let path = req.uri().path();
         let inner = self.rules.as_ref();
         let inner = inner.read().unwrap();
 
         if let Some(item) = inner.iter().find(|x| x.read().unwrap().rule.path == path) {
-            println!("Matched rule {:?}", item);
+            info!("Matched rule {:?}", item);
             item.write().unwrap().record_request(&req);
 
             let item = item.read().unwrap();
             let code = item.rule.status_code.unwrap_or(Code::Ok);
             if let Some(body) = &item.rule.result {
-                println!("Returning body ({} bytes)", body.len());
+                debug!("Returning body ({} bytes)", body.len());
                 let body = body.clone();
 
                 let fut = async move {
@@ -186,7 +187,7 @@ impl MockGrpcServer {
                     .status(200)
                     .header("content-type", "application/grpc")
                     .header("grpc-status", format!("{}", status));
-                println!("Returning empty body with status {}", status);
+                info!("Returning empty body with status {}", status);
 
                 return Box::pin(async move {
                     let body = builder.body(tonic::body::empty_body()).unwrap();
@@ -195,7 +196,15 @@ impl MockGrpcServer {
             };
         }
 
-        println!("Request unhandled");
-        panic!("Mock is not setup for {}", path);
+        warn!("Request unhandled");
+        let builder = http::Response::builder()
+            .status(200)
+            .header("content-type", "application/grpc")
+            .header("grpc-status", format!("{}", Code::Unimplemented as u32));
+
+        return Box::pin(async move {
+            let body = builder.body(tonic::body::empty_body()).unwrap();
+            Ok(body)
+        });
     }
 }

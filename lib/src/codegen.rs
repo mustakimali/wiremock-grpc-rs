@@ -67,7 +67,7 @@ macro_rules! generate {
 
         impl $type {
             /// Start the server and listens to an available port.
-            /// 
+            ///
             /// The port can be accesed using `address()`
             /// ```no_run
             /// let server = MyMockServer::start_default();
@@ -83,7 +83,7 @@ macro_rules! generate {
             }
 
             /// Start the server with a specified port.
-            /// 
+            ///
             /// ## Panics
             /// * When the the port is not available.
             pub async fn start(port: u16) -> Self {
