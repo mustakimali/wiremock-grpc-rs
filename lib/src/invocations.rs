@@ -39,6 +39,16 @@ impl MockGrpcServer {
             panic!("The given MockBuilder is not registered with the mock server.");
         }
     }
+
+    /// Returns number of handled requests
+    pub fn find_request_count(&self) -> usize {
+        let mut count = 0;
+        for item in self.rules.read().unwrap().iter() {
+            let item = item.read().unwrap();
+            count += item.invocations.len();
+        }
+        count
+    }
 }
 
 impl PartialEq for MockBuilder {

@@ -1,7 +1,5 @@
 mod hello;
-pub use hello::greeter_client;
-pub use hello::greeter_server;
-pub use hello::{HelloReply, HelloRequest};
+pub use hello::*;
 
 #[cfg(test)]
 mod tests {

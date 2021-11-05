@@ -10,6 +10,16 @@ pub struct HelloReply {
     #[prost(string, tag = "1")]
     pub message: ::prost::alloc::string::String,
 }
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct WeatherRequest {
+    #[prost(string, tag = "1")]
+    pub city: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct WeatherReply {
+    #[prost(string, tag = "1")]
+    pub weather: ::prost::alloc::string::String,
+}
 #[doc = r" Generated client implementations."]
 pub mod greeter_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -86,6 +96,20 @@ pub mod greeter_client {
             let path = http::uri::PathAndQuery::from_static("/hello.Greeter/SayHello");
             self.inner.unary(request.into_request(), path, codec).await
         }
+        pub async fn weather_info(
+            &mut self,
+            request: impl tonic::IntoRequest<super::WeatherRequest>,
+        ) -> Result<tonic::Response<super::WeatherReply>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static("/hello.Greeter/WeatherInfo");
+            self.inner.unary(request.into_request(), path, codec).await
+        }
     }
 }
 #[doc = r" Generated server implementations."]
@@ -100,6 +124,10 @@ pub mod greeter_server {
             &self,
             request: tonic::Request<super::HelloRequest>,
         ) -> Result<tonic::Response<super::HelloReply>, tonic::Status>;
+        async fn weather_info(
+            &self,
+            request: tonic::Request<super::WeatherRequest>,
+        ) -> Result<tonic::Response<super::WeatherReply>, tonic::Status>;
     }
     #[doc = " The greeting service definition."]
     #[derive(Debug)]
@@ -162,6 +190,37 @@ pub mod greeter_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = SayHelloSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/hello.Greeter/WeatherInfo" => {
+                    #[allow(non_camel_case_types)]
+                    struct WeatherInfoSvc<T: Greeter>(pub Arc<T>);
+                    impl<T: Greeter> tonic::server::UnaryService<super::WeatherRequest> for WeatherInfoSvc<T> {
+                        type Response = super::WeatherReply;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::WeatherRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).weather_info(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = WeatherInfoSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

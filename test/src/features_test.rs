@@ -5,8 +5,13 @@ mod wiremock_gen {
 use std::net::TcpStream;
 
 use wiremock_gen::*;
-use wiremock_grpc::{tonic::Code, *};
-use wiremock_grpc_protogen::{greeter_client::GreeterClient, HelloReply, HelloRequest};
+use wiremock_grpc::{
+    tonic::{transport::Channel, Code},
+    *,
+};
+use wiremock_grpc_protogen::{
+    greeter_client::GreeterClient, HelloReply, HelloRequest, WeatherReply, WeatherRequest,
+};
 
 #[tokio::test]
 async fn it_starts_with_specified_port() {
@@ -70,8 +75,8 @@ async fn default() {
 
 #[tokio::test]
 async fn handled_when_mock_set_with_different_status_code() {
-    // Server
-    let mut server = MyMockServer::start_default().await;
+    // client & server
+    let (mut server, mut client) = create().await;
 
     server.setup(
         MockBuilder::given("/hello.Greeter/SayHello")
@@ -80,15 +85,6 @@ async fn handled_when_mock_set_with_different_status_code() {
                 message: "yo".into(),
             }),
     );
-
-    // Client
-    let channel =
-        tonic::transport::Channel::from_shared(format!("http://[::1]:{}", server.address().port()))
-            .unwrap()
-            .connect()
-            .await
-            .unwrap();
-    let mut client = GreeterClient::new(channel);
 
     // Act
     let response = client
@@ -105,18 +101,9 @@ async fn handled_when_mock_set_with_different_status_code() {
 #[should_panic]
 async fn panic_when_mock_not_set() {
     // Server
-    let server = MyMockServer::start_default().await;
+    let (_, mut client) = create().await;
 
     // no mock is set up
-
-    // Client
-    let channel =
-        tonic::transport::Channel::from_shared(format!("http://[::1]:{}", server.address().port()))
-            .unwrap()
-            .connect()
-            .await
-            .unwrap();
-    let mut client = GreeterClient::new(channel);
 
     // Act
     let _ = client
@@ -125,4 +112,58 @@ async fn panic_when_mock_not_set() {
         })
         .await
         .expect("Must panic");
+}
+
+#[tokio::test]
+async fn multiple_mocks() {
+    let (mut server, mut client) = create().await;
+
+    // setup
+    let request1 = server.setup(
+        MockBuilder::given("/hello.Greeter/SayHello").return_body(|| HelloReply {
+            message: "Hello to you too!".into(),
+        }),
+    );
+
+    let request2 = server.setup(
+        MockBuilder::given("/hello.Greeter/WeatherInfo").return_body(|| WeatherReply {
+            weather: "rainy, as always".into(),
+        }),
+    );
+
+    // Act
+    let response1 = client
+        .say_hello(HelloRequest {
+            name: "Mustakim".into(),
+        })
+        .await
+        .unwrap();
+
+    assert_eq!("Hello to you too!", response1.into_inner().message);
+
+    let response2 = client
+        .weather_info(WeatherRequest {
+            city: "London".into(),
+        })
+        .await
+        .unwrap();
+    assert_eq!("rainy, as always", response2.into_inner().weather);
+
+    // single request
+    let _ = server.find_one(&request1);
+    let _ = server.find_one(&request2);
+
+    assert_eq!(2, server.find_request_count());
+}
+
+async fn create() -> (MyMockServer, GreeterClient<Channel>) {
+    let server = MyMockServer::start_default().await;
+
+    let channel =
+        tonic::transport::Channel::from_shared(format!("http://[::1]:{}", server.address().port()))
+            .unwrap()
+            .connect()
+            .await
+            .unwrap();
+    return (server, GreeterClient::new(channel));
 }

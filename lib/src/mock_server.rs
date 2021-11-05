@@ -60,7 +60,7 @@ impl RuleItem {
             headers: r.headers().clone(),
             method: r.method().clone(),
             uri: r.uri().to_string(),
-        })
+        });
     }
 }
 
