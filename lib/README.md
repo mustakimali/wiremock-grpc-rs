@@ -97,3 +97,7 @@ async fn default() {
     );
 }
 ```
+
+## Notes
+* It panics when dropped if there are rules set but no requesta are received.
+* Request to route without any rules set will return `Unimplemented` gRPC status.
