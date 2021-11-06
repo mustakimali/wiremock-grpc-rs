@@ -1,3 +1,5 @@
+//! Proto generate client and server code
+//! using [`tonic_build`]
 mod hello;
 pub use hello::*;
 

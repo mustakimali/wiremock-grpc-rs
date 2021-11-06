@@ -4,3 +4,5 @@ mod codegen_test;
 mod features_test;
 #[allow(unused_imports)]
 mod mocks_test;
+#[allow(unused_imports)]
+mod validations_test;

@@ -158,7 +158,7 @@ async fn multiple_mocks() {
 }
 
 #[tokio::test]
-#[should_panic]
+#[should_panic(expected = "Server terminated with unmatched rules: \n/hello.Greeter/SayHello")]
 async fn unmatched_request_panics() {
     let (mut server, _) = create().await;
 

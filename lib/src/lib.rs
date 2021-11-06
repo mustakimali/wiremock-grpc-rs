@@ -66,8 +66,8 @@
 
 mod builder;
 mod codegen;
-mod invocations;
 mod grpc_server;
+mod invocations;
 mod tonic_ext;
 
 pub use builder::{MockBuilder, Mountable, Then};
