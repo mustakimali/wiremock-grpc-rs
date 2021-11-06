@@ -8,7 +8,6 @@ impl GrpcServer {
     /// * Empty Vector: when no request was made that matches the builder,
     pub fn find(&self, r: &MockBuilder) -> Option<Vec<RequestItem>> {
         for item in self.rules.read().unwrap().iter() {
-            let item = item.read().unwrap();
             if &item.rule == r {
                 let mut result = Vec::default();
                 for i in &item.invocations {
@@ -44,7 +43,6 @@ impl GrpcServer {
     pub fn find_request_count(&self) -> u32 {
         let mut count = 0;
         for item in self.rules.read().unwrap().iter() {
-            let item = item.read().unwrap();
             count += item.invocations_count;
         }
         count
@@ -61,7 +59,7 @@ impl GrpcServer {
             .read()
             .unwrap()
             .iter()
-            .filter(|f| f.read().unwrap().invocations_count == 0)
+            .filter(|f| f.invocations_count == 0)
             .count()
     }
 }

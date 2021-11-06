@@ -31,7 +31,7 @@ use tonic::{
 pub struct GrpcServer {
     pub(crate) address: SocketAddr,
     inner: Arc<Option<Inner>>,
-    pub(crate) rules: Arc<RwLock<Vec<RwLock<RuleItem>>>>,
+    pub(crate) rules: Arc<RwLock<Vec<RuleItem>>>,
 }
 
 #[derive(Debug)]
@@ -84,8 +84,8 @@ impl Drop for GrpcServer {
                     .read()
                     .unwrap()
                     .iter()
-                    .filter(|f| f.read().unwrap().invocations_count == 0)
-                    .map(|f| f.read().unwrap().rule.path.clone())
+                    .filter(|f| f.invocations_count == 0)
+                    .map(|f| f.rule.path.clone())
                     .collect::<Vec<String>>();
 
                 self.reset();
@@ -174,14 +174,12 @@ impl GrpcServer {
         info!("Request to {}", req.uri().path());
 
         let path = req.uri().path();
-        let inner = self.rules.as_ref();
-        let inner = inner.read().unwrap();
+        let mut inner = self.rules.write().unwrap();
 
-        if let Some(item) = inner.iter().find(|x| x.read().unwrap().rule.path == path) {
+        if let Some(item) = inner.iter_mut().find(|x| x.rule.path == path) {
             info!("Matched rule {:?}", item);
-            item.write().unwrap().record_request(&req);
+            item.record_request(&req);
 
-            let item = item.read().unwrap();
             let code = item.rule.status_code.unwrap_or(Code::Ok);
             if let Some(body) = &item.rule.result {
                 debug!("Returning body ({} bytes)", body.len());

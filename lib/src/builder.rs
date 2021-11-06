@@ -75,14 +75,11 @@ impl Mountable for MockBuilder {
             panic!("Must set the status code or body before attempting to mount the rule.");
         }
 
-        s.rules
-            .write()
-            .unwrap()
-            .push(std::sync::RwLock::new(RuleItem {
-                invocations_count: 0,
-                invocations: Vec::default(),
-                rule: self,
-            }))
+        s.rules.write().unwrap().push(RuleItem {
+            invocations_count: 0,
+            invocations: Vec::default(),
+            rule: self,
+        })
     }
 }
 
