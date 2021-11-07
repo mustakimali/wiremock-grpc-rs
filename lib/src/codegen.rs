@@ -1,4 +1,24 @@
-#[doc = include_str!("../README.md")]
+/// Generate mock server code for the given `prefix` and `type`.
+///
+/// For each gRPC server you need to generate codes using this macro.
+///
+/// # Arguments
+/// * `prefix` - The prefix of the RPC (eg. `hello.Greeter` if the RPC is `/helloworld.Greeter/SayHello`)
+/// * `type` - Type of the generated server. This [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::grpc_server::GrpcServer). You will be interacting with this type in your test.
+///
+/// # Example
+/// ```no_run
+/// mod wiremock_gen {
+///     // hello.Greeter: is the prefix of all rpc,
+///     // MyMockServer: name of the generated Server,
+///     wiremock_grpc::generate!("hello.Greeter", MyMockServer);
+/// }
+/// use wiremock_gen::*;  // this imports generated
+/// use wiremock_grpc::*; // this imports MockBuilder
+///
+/// // ... Later in your test (MyMockServer is generated above)
+/// let mut server = MyMockServer::start_default().await;
+/// ```
 #[macro_export]
 macro_rules! generate {
     ($prefix:literal, $type: ident) => {

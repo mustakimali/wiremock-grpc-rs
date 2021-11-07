@@ -101,3 +101,7 @@ async fn default() {
 ## Notes
 * It panics when dropped if there are rules set but no requesta are received.
 * Request to route without any rules set will return `Unimplemented` gRPC status.
+
+## Limitations
+* You have to pass the service prefix (eg. `hello.Greeter`) or RPC path (eg. `/hello.Greeter/SayHello`) as string. These paths are written as string literal in the generated code using `tonic_build`. I have to figure out how access these string literals from a given type or function of the generated code.
+* You are unable to spy the request body send to the mock server or set a mock based on a specific request body. I'm yet to get a solid grip on 🦀 to be able to do this.

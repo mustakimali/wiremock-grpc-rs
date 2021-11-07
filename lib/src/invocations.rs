@@ -24,7 +24,7 @@ impl GrpcServer {
     ///
     /// ## Panics
     /// * No request matching the criteria (eg. No request receieved by the mock server)
-    /// * When more than one request matches the criteria (in this case use [`find`])
+    /// * When more than one request matches the criteria (in this case use [`GrpcServer::find`])
     /// * When the criteria is inavlid (not registered with the server using the `setup()` function),
     pub fn find_one(&self, r: &MockBuilder) -> RequestItem {
         if let Some(m) = self.find(r) {
