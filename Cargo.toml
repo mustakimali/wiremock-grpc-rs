@@ -2,6 +2,7 @@
 
 members = [
     "lib",
+    "lib-macro",
     "test",
     "protogen",
 ]

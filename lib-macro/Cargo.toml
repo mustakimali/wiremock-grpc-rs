@@ -1,0 +1,15 @@
+[package]
+name = "wiremock-grpc-proc-macro"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1.0.81"
+quote = "1.0.10"
+proc-macro2 = "1.0.32"
+
+[dev-dependencies]
+wiremock-grpc-protogen = {path = "../protogen/"}

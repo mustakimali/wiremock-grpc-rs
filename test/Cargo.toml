@@ -11,5 +11,6 @@ doctest = false
 [dependencies]
 tokio = "1.12.0"
 wiremock-grpc = {path = "../lib/"}
+wiremock-grpc-proc-macro = {path = "../lib-macro/"}
 wiremock-grpc-protogen = {path = "../protogen/"}
-#wiremock-grpc = "0.0.2-alpha6"
+#wiremock-grpc = "0.0.3-alpha1"
