@@ -10,6 +10,4 @@ proc-macro = true
 syn = "1.0.81"
 quote = "1.0.10"
 proc-macro2 = "1.0.32"
-
-[dev-dependencies]
-wiremock-grpc-protogen = {path = "../protogen/"}
+regex = "1.5.4"

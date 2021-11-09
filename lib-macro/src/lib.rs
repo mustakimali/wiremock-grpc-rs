@@ -2,10 +2,12 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput, Ident, Result};
 
+mod parser;
+
 #[proc_macro_derive(WireMockGrpcServer, attributes(server))]
 pub fn derive_helper_attr(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    println!("{}", item.to_string());
     let input = parse_macro_input!(item as DeriveInput);
-    println!("item: \"{:#?}\"", input);
 
     proc_macro::TokenStream::from(impl_register(input))
 }
@@ -14,7 +16,6 @@ pub fn derive_helper_attr(item: proc_macro::TokenStream) -> proc_macro::TokenStr
 fn impl_register(input: DeriveInput) -> TokenStream {
     let name = &input.ident;
     let attrs = &input.attrs;
-    // println!("{:#?}", input);
 
     let attrs = attrs
         .iter()
@@ -33,16 +34,17 @@ fn impl_register(input: DeriveInput) -> TokenStream {
         });
     
         //let name = quote! { #name };
-        //println!("{}", name);
 
-    quote! {
-        impl #name {
-            fn attach(self) {
-                todo!()
-                #(#attrs)*
-            }
-        }
-    }
+    // quote! {
+    //     impl #name {
+    //         fn attach(self) {
+    //             todo!()
+    //             #(#attrs)*
+    //         }
+    //     }
+    // }
+
+    quote! {}
 }
 
 fn parse_attach_attribute(attr: &Attribute) -> Result<Dependency> {
@@ -50,7 +52,8 @@ fn parse_attach_attribute(attr: &Attribute) -> Result<Dependency> {
     // println!("{:#?}", list);
     let ident = list.path.get_ident().expect("expected identifier");
     let method = Ident::new(&format!("{}_order", ident), Span::call_site());
-    println!("{:#?}", method);
+    //println!("{:#?}", method);
+
     let dependencies = list
         .nested
         .into_pairs()
@@ -63,7 +66,6 @@ fn parse_attach_attribute(attr: &Attribute) -> Result<Dependency> {
             _ => panic!("lit not supported"),
         })
         .collect();
-    println!("{:#?}", dependencies);
 
     Ok(Dependency {
         method,
