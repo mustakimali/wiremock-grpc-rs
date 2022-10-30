@@ -1,11 +1,12 @@
 [package]
 name = "wiremock-grpc"
-version = "0.0.3-alpha1"
+version = "0.0.3-alpha2"
 edition = "2021"
 description = "Mock gRPC server to test your outgoing gRPC requests"
 license = "MIT OR Apache-2.0"
 authors = ["Mohammad Mustakim Ali <i@mustak.im>"]
 documentation = "https://docs.rs/wiremock-grpc/"
+repository = "https://github.com/mustakimali/wiremock-grpc-rs"
 categories = ["development-tools"]
 
 [lib]
