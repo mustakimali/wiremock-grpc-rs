@@ -13,9 +13,9 @@ categories = ["development-tools"]
 doctest = false
 
 [dependencies]
-tonic = "0.6.0"
-rand = "0.8.4"
-prost = "0.9.0"
-tokio = "1.12.0"
-http-body = "0.4.4"
-log = "0.4.14"
+tonic = "0.6"
+rand = "0.8"
+prost = "0.9"
+tokio = "1"
+http-body = "0.4"
+log = "0.4"
