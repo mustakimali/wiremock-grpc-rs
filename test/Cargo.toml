@@ -12,4 +12,3 @@ doctest = false
 tokio = "1"
 wiremock-grpc = {path = "../lib/"}
 wiremock-grpc-protogen = {path = "../protogen/"}
-#wiremock-grpc = "0.0.2-alpha6"

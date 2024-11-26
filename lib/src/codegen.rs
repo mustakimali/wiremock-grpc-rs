@@ -30,7 +30,7 @@ macro_rules! generate {
             ops::{Deref, DerefMut},
             task::Poll,
         };
-
+        
         use wiremock_grpc::*;
 
         /// A running gRPC server that binds to service with prefix: `
@@ -66,7 +66,7 @@ macro_rules! generate {
             B::Error: Into<tonic::codegen::StdError> + Send + 'static,
         {
             type Response = tonic::codegen::http::Response<tonic::body::BoxBody>;
-            type Error = tonic::codegen::Never;
+            type Error = std::convert::Infallible;
             type Future = tonic::codegen::BoxFuture<Self::Response, Self::Error>;
 
             fn poll_ready(
@@ -81,7 +81,7 @@ macro_rules! generate {
             }
         }
 
-        impl tonic::transport::NamedService for $type {
+        impl tonic::server::NamedService for $type {
             const NAME: &'static str = $prefix;
         }
 
