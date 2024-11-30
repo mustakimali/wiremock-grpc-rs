@@ -9,6 +9,7 @@ publish = false
 doc =  false
 
 [dependencies]
-tonic = "0.6"
-tonic-build = "0.6"
-prost = "0.9"
+tonic = { version = "0.12.3", features = ["codegen", "prost", "transport"] }
+tonic-build = { version = "0.12.3",features = ["prost", "transport"] }
+prost = { version = "0.13.3" }
+prost-types = { version = "0.13.3" }

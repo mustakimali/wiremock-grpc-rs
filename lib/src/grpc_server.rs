@@ -11,7 +11,7 @@ use rand::Rng;
 use tonic::{
     codegen::{
         http::{self, HeaderMap, HeaderValue, Method},
-        Body, Never, StdError,
+        Body, StdError,
     },
     Code,
 };
@@ -166,7 +166,7 @@ impl GrpcServer {
     pub fn handle_request<B>(
         &self,
         req: http::Request<B>,
-    ) -> tonic::codegen::BoxFuture<http::Response<tonic::body::BoxBody>, Never>
+    ) -> tonic::codegen::BoxFuture<http::Response<tonic::body::BoxBody>, std::convert::Infallible>
     where
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
