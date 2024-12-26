@@ -2,8 +2,7 @@ use std::{
     ops::{Deref, DerefMut},
     task::Poll,
 };
-use tonic::{codegen::http, Code};
-
+use tonic::codegen::http;
 use wiremock_grpc::*;
 
 #[tokio::test]

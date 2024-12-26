@@ -1,17 +1,18 @@
+mod hello {
+    tonic::include_proto!("hello");
+}
+
 mod wiremock_gen {
     wiremock_grpc::generate!("hello.Greeter", MyMockServer);
 }
 
-use std::net::TcpStream;
-
-use wiremock_gen::*;
-use wiremock_grpc::{
-    tonic::{transport::Channel, Code},
-    *,
-};
-use wiremock_grpc_protogen::{
+use hello::{
     greeter_client::GreeterClient, HelloReply, HelloRequest, WeatherReply, WeatherRequest,
 };
+use std::net::TcpStream;
+use tonic::{transport::Channel, Code};
+use wiremock_gen::*;
+use wiremock_grpc::*;
 
 #[tokio::test]
 async fn it_starts_with_specified_port() {

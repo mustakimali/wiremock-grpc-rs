@@ -1,12 +1,15 @@
-use tonic::Code;
+mod hello {
+    tonic::include_proto!("hello");
+}
 
 mod wiremock_gen {
     wiremock_grpc::generate!("hello.Greeter", MyMockServer);
 }
 
+use hello::HelloReply;
+use tonic::Code;
 use wiremock_gen::*;
 use wiremock_grpc::*;
-use wiremock_grpc_protogen::HelloReply;
 
 #[tokio::test]
 #[should_panic(expected = "Server terminated with unmatched rules: \n/")]

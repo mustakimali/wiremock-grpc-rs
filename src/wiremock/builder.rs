@@ -1,4 +1,4 @@
-use crate::{grpc_server::RuleItem, GrpcServer};
+use crate::wiremock::grpc_server::{GrpcServer, RuleItem};
 
 pub trait Then {
     fn return_status(self, status: tonic::Code) -> Self;
