@@ -101,7 +101,7 @@ impl Drop for GrpcServer {
 impl GrpcServer {
     pub fn new(port: u16) -> Self {
         Self {
-            address: format!("[::1]:{}", port).parse().unwrap(),
+            address: format!("[::1]:{port}").parse().unwrap(),
             inner: Arc::default(),
             rules: Arc::default(),
         }
@@ -112,7 +112,7 @@ impl GrpcServer {
 
         loop {
             let port: u16 = rng.gen_range(50000..60000);
-            let addr: SocketAddr = format!("[::1]:{}", port).parse().unwrap();
+            let addr: SocketAddr = format!("[::1]:{port}").parse().unwrap();
 
             if TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(25)).is_err() {
                 return Some(port);
@@ -187,7 +187,7 @@ impl GrpcServer {
 
                 let fut = async move {
                     let method = GenericSvc(body);
-                    let codec = GenericCodec::default();
+                    let codec = GenericCodec {};
 
                     let mut grpc = tonic::server::Grpc::new(codec);
                     let mut result = grpc.unary(method, req).await;
@@ -198,19 +198,18 @@ impl GrpcServer {
                     Ok(result)
                 };
                 return Box::pin(fut);
-            } else {
-                let status = code as u32;
-                let builder = http::Response::builder()
-                    .status(200)
-                    .header("content-type", "application/grpc")
-                    .header("grpc-status", format!("{}", status));
-                info!("Returning empty body with status {}", status);
+            }
+            let status = code as u32;
+            let builder = http::Response::builder()
+                .status(200)
+                .header("content-type", "application/grpc")
+                .header("grpc-status", format!("{status}"));
+            info!("Returning empty body with status {}", status);
 
-                return Box::pin(async move {
-                    let body = builder.body(tonic::body::empty_body()).unwrap();
-                    Ok(body)
-                });
-            };
+            return Box::pin(async move {
+                let body = builder.body(tonic::body::empty_body()).unwrap();
+                Ok(body)
+            });
         }
 
         warn!("Request unhandled");
@@ -219,9 +218,9 @@ impl GrpcServer {
             .header("content-type", "application/grpc")
             .header("grpc-status", format!("{}", Code::Unimplemented as u32));
 
-        return Box::pin(async move {
+        Box::pin(async move {
             let body = builder.body(tonic::body::empty_body()).unwrap();
             Ok(body)
-        });
+        })
     }
 }

@@ -79,7 +79,7 @@ impl Mountable for MockBuilder {
             invocations_count: 0,
             invocations: Vec::default(),
             rule: self,
-        })
+        });
     }
 }
 
@@ -98,7 +98,7 @@ impl Then for MockBuilder {
     {
         let result = f();
         let mut buf = prost::bytes::BytesMut::new();
-        let _ = result
+        result
             .encode(&mut buf)
             .expect("Unable to encode the message");
         let result = buf.to_vec();
@@ -125,7 +125,7 @@ impl Then for ThenBuilder {
     {
         let result = f();
         let mut buf = prost::bytes::BytesMut::new();
-        let _ = result
+        result
             .encode(&mut buf)
             .expect("Unable to encode the message");
         let result = buf.to_vec();
@@ -152,6 +152,6 @@ impl Mountable for ThenBuilder {
     fn mount(self, s: &mut GrpcServer) {
         let rb: MockBuilder = self.into();
 
-        rb.mount(s)
+        rb.mount(s);
     }
 }
