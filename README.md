@@ -28,6 +28,6 @@
 <br/>
 
 
-* [src/](lib/) - The actual crate that gets published to crates.io
-* [tests/](test/) - Integration tests
+* [src/](src/) - The actual crate that gets published to crates.io
+* [tests/](tests/) - Integration tests
 * [proto/](proto/) - Protobuf file
