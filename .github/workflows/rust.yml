@@ -20,5 +20,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install protobuf-compiler
     - name: Build
       run: cargo build
+    - name: Lint
+      run: cargo clippy
     - name: Run tests
       run: cargo test

@@ -1,4 +1,4 @@
-use crate::{grpc_server::RequestItem, GrpcServer, MockBuilder};
+use crate::{wiremock::grpc_server::RequestItem, GrpcServer, MockBuilder};
 
 impl GrpcServer {
     /// Finds one or more matched requests for a given request builder.

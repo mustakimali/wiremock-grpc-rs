@@ -30,7 +30,7 @@ macro_rules! generate {
             ops::{Deref, DerefMut},
             task::Poll,
         };
-        
+
         use wiremock_grpc::*;
 
         /// A running gRPC server that binds to service with prefix: `

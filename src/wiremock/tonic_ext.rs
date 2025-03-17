@@ -25,7 +25,7 @@ impl Codec for GenericCodec {
     type Decoder = GenericProstDecoder;
 
     fn encoder(&mut self) -> Self::Encoder {
-        GenericProstEncoder(Vec::default())
+        GenericProstEncoder {}
     }
 
     fn decoder(&mut self) -> Self::Decoder {
@@ -35,7 +35,7 @@ impl Codec for GenericCodec {
 
 /// A [`Encoder`] that knows how to encode `T`.
 #[derive(Debug, Clone, Default)]
-pub struct GenericProstEncoder(Vec<u8>);
+pub struct GenericProstEncoder;
 
 impl tonic::codec::Encoder for GenericProstEncoder {
     type Item = Vec<u8>;
