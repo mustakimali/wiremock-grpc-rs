@@ -65,7 +65,7 @@ macro_rules! generate {
             B: ::wiremock_grpc::http_body::Body + Send + 'static,
             B::Error: Into<tonic::codegen::StdError> + Send + 'static,
         {
-            type Response = tonic::codegen::http::Response<tonic::body::BoxBody>;
+            type Response = tonic::codegen::http::Response<tonic::body::Body>;
             type Error = std::convert::Infallible;
             type Future = tonic::codegen::BoxFuture<Self::Response, Self::Error>;
 
