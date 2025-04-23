@@ -166,7 +166,7 @@ impl GrpcServer {
     pub fn handle_request<B>(
         &self,
         req: http::Request<B>,
-    ) -> tonic::codegen::BoxFuture<http::Response<tonic::body::BoxBody>, std::convert::Infallible>
+    ) -> tonic::codegen::BoxFuture<http::Response<tonic::body::Body>, std::convert::Infallible>
     where
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
@@ -207,7 +207,7 @@ impl GrpcServer {
             info!("Returning empty body with status {}", status);
 
             return Box::pin(async move {
-                let body = builder.body(tonic::body::empty_body()).unwrap();
+                let body = builder.body(tonic::body::Body::default()).unwrap();
                 Ok(body)
             });
         }
@@ -219,7 +219,7 @@ impl GrpcServer {
             .header("grpc-status", format!("{}", Code::Unimplemented as u32));
 
         Box::pin(async move {
-            let body = builder.body(tonic::body::empty_body()).unwrap();
+            let body = builder.body(tonic::body::Body::empty()).unwrap();
             Ok(body)
         })
     }

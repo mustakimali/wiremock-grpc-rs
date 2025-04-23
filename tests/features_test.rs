@@ -18,7 +18,7 @@ use wiremock_grpc::*;
 async fn it_starts_with_specified_port() {
     let server = MyMockServer::start(5055).await;
 
-    assert!(TcpStream::connect(&server.address()).is_ok())
+    assert!(TcpStream::connect(server.address()).is_ok());
 }
 
 #[tokio::test]
@@ -191,5 +191,5 @@ async fn create() -> (MyMockServer, GreeterClient<Channel>) {
             .connect()
             .await
             .unwrap();
-    return (server, GreeterClient::new(channel));
+    (server, GreeterClient::new(channel))
 }

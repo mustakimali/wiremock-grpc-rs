@@ -9,7 +9,7 @@ use wiremock_grpc::*;
 async fn codegen_works() {
     let server = Server::start_default().await;
 
-    assert!(std::net::TcpStream::connect(&server.address()).is_ok())
+    assert!(std::net::TcpStream::connect(server.address()).is_ok())
 }
 
 //
@@ -41,7 +41,7 @@ where
     B: http_body::Body + Send + 'static,
     B::Error: Into<tonic::codegen::StdError> + Send + 'static,
 {
-    type Response = tonic::codegen::http::Response<tonic::body::BoxBody>;
+    type Response = tonic::codegen::http::Response<tonic::body::Body>;
     type Error = std::convert::Infallible;
     type Future = tonic::codegen::BoxFuture<Self::Response, Self::Error>;
 
@@ -72,7 +72,7 @@ impl Server {
     }
 
     async fn start_internal(&mut self) -> Self {
-        let address = self.address().clone();
+        let address = *self.address();
         let thread = tokio::spawn(
             tonic::transport::Server::builder()
                 .add_service(self.clone())
