@@ -14,15 +14,17 @@ keywords = ["grpc", "mock", "testing"]
 doctest = false
 
 [dependencies]
-tonic = { version = "0.13.0" }
+tonic = { version = "0.14.1" }
+tonic-prost = { version = "0.14.1" }
 rand = { version = "0.8.5" }
-prost = { version = "0.13.3" }
+prost = { version = "0.14.1" }
 tokio = { version = "1.41.1" }
 http-body = { version = "1.0.1" }
 log = { version = "0.4.22" }
 
 [build-dependencies]
-tonic-build = { version = "0.13.0" }
+tonic-build = { version = "0.14.1" }
+tonic-prost-build = { version = "0.14.1" }
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }
