@@ -1,6 +1,6 @@
 [package]
 name = "wiremock-grpc"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "Mock gRPC server to test your outgoing gRPC requests"
 license = "MIT OR Apache-2.0"
@@ -14,17 +14,17 @@ keywords = ["grpc", "mock", "testing"]
 doctest = false
 
 [dependencies]
-tonic = { version = "0.14.1" }
-tonic-prost = { version = "0.14.1" }
+tonic = { version = "0.14" }
+tonic-prost = { version = "0.14" }
 rand = { version = "0.8.5" }
-prost = { version = "0.14.1" }
+prost = { version = "0.14" }
 tokio = { version = "1.41.1" }
 http-body = { version = "1.0.1" }
 log = { version = "0.4.22" }
 
 [build-dependencies]
-tonic-build = { version = "0.14.1" }
-tonic-prost-build = { version = "0.14.1" }
+tonic-build = { version = "0.14" }
+tonic-prost-build = { version = "0.14" }
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }
