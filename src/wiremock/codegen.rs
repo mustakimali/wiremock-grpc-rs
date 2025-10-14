@@ -27,6 +27,7 @@ macro_rules! generate {
             Code,
         };
         use std::{
+            net::SocketAddr,
             ops::{Deref, DerefMut},
             task::Poll,
         };
@@ -108,6 +109,14 @@ macro_rules! generate {
             /// * When the the port is not available.
             pub async fn start(port: u16) -> Self {
                 Self(GrpcServer::new(port)).start_internal().await
+            }
+
+            /// Start the server with a specified address.
+            ///
+            /// ## Panics
+            /// * When the the address is not available.
+            pub async fn start_with_addr(addr: SocketAddr) -> Self {
+                Self(GrpcServer::with_addr(addr)).start_internal().await
             }
 
             async fn start_internal(&mut self) -> Self {
