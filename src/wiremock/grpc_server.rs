@@ -173,14 +173,14 @@ impl GrpcServer {
     {
         info!("Request to {}", req.uri().path());
 
-        let path = req.uri().path();
         let mut inner = self.rules.write().unwrap();
 
-        if let Some(item) = inner.iter_mut().find(|x| x.rule.path == path) {
+        if let Some(item) = inner.iter_mut().find(|x| x.rule.matches(&req)) {
             info!("Matched rule {:?}", item);
             item.record_request(&req);
 
             let code = item.rule.status_code.unwrap_or(Code::Ok);
+            let return_headers = item.rule.response_headers.clone();
             if let Some(body) = &item.rule.result {
                 debug!("Returning body ({} bytes)", body.len());
                 let body = body.clone();
@@ -191,10 +191,19 @@ impl GrpcServer {
 
                     let mut grpc = tonic::server::Grpc::new(codec);
                     let mut result = grpc.unary(method, req).await;
-                    result.headers_mut().append(
+
+                    let headers = result.headers_mut();
+                    headers.append(
                         "grpc-status",
                         HeaderValue::from_str(format!("{}", code as u32).as_str()).unwrap(),
                     );
+
+                    for (name, value) in return_headers {
+                        if let Some(name) = name {
+                            headers.insert(name, value);
+                        }
+                    }
+
                     Ok(result)
                 };
                 return Box::pin(fut);
