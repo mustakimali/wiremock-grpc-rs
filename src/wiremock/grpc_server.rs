@@ -100,8 +100,12 @@ impl Drop for GrpcServer {
 
 impl GrpcServer {
     pub fn new(port: u16) -> Self {
+        Self::with_addr(format!("[::1]:{port}").parse().unwrap())
+    }
+
+    pub fn with_addr(address: SocketAddr) -> Self {
         Self {
-            address: format!("[::1]:{port}").parse().unwrap(),
+            address,
             inner: Arc::default(),
             rules: Arc::default(),
         }
