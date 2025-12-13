@@ -10,7 +10,7 @@ use hello::{
     greeter_client::GreeterClient, HelloReply, HelloRequest, WeatherReply, WeatherRequest,
 };
 use std::net::TcpStream;
-use tonic::{transport::Channel, Code};
+use tonic::{transport::Channel, Code, Request};
 use wiremock_gen::*;
 use wiremock_grpc::*;
 
@@ -72,6 +72,37 @@ async fn default() {
         ),
         request.uri
     );
+}
+
+#[tokio::test]
+async fn mocked_header_return() {
+    let (mut server, mut client) = create().await;
+
+    // Setup
+    let mock = server.setup(
+        MockBuilder::given("/hello.Greeter/SayHello")
+            .return_header("X-RateLimit-Remaining", "100")
+            .return_body(|| HelloReply {
+                message: "Hello to you too!".into(),
+            }),
+    );
+
+    // Act
+    let response = client
+        .say_hello(HelloRequest {
+            name: "Yo yo".into(),
+        })
+        .await
+        .unwrap();
+
+    assert_eq!(
+        response
+            .metadata()
+            .get("X-RateLimit-Remaining")
+            .expect("header should be set"),
+        "100"
+    );
+    let _ = server.find_one(&mock);
 }
 
 #[tokio::test]
@@ -154,6 +185,78 @@ async fn multiple_mocks() {
     // single request
     let _ = server.find_one(&request1);
     let _ = server.find_one(&request2);
+
+    assert_eq!(2, server.find_request_count());
+}
+
+#[tokio::test]
+async fn header_discriminated_mocks() {
+    let (mut server, mut client) = create().await;
+
+    let mock1_session_id = "mock1";
+    let mock2_session_id = "mock2";
+    // setup
+    let mock1 = server.setup(
+        MockBuilder::when()
+            .path("/hello.Greeter/SayHello")
+            .header("session-id", mock1_session_id)
+            .then()
+            .return_body(|| HelloReply {
+                message: "Hello to you too!".into(),
+            }),
+    );
+
+    let mock2 = server.setup(
+        MockBuilder::when()
+            .path("/hello.Greeter/SayHello")
+            .header("session-id", mock2_session_id)
+            .then()
+            .return_body(|| HelloReply {
+                message: "Hello to you two!".into(),
+            }),
+    );
+
+    // Act
+    let mut request1 = Request::new(HelloRequest {
+        name: "Mustakim".into(),
+    });
+
+    request1
+        .metadata_mut()
+        .insert("session-id", mock1_session_id.parse().unwrap());
+    let response1 = client.say_hello(request1).await.unwrap();
+
+    assert_eq!("Hello to you too!", response1.into_inner().message);
+
+    let mut request2 = Request::new(HelloRequest { name: "Zak".into() });
+    request2
+        .metadata_mut()
+        .insert("session-id", mock2_session_id.parse().unwrap());
+    let response2 = client.say_hello(request2).await.unwrap();
+    assert_eq!("Hello to you two!", response2.into_inner().message);
+
+    // single request
+    let tracked_response_1 = server.find_one(&mock1);
+    let tracked_response_2 = server.find_one(&mock2);
+
+    assert_eq!(
+        tracked_response_1
+            .headers
+            .get("session-id")
+            .expect("header set")
+            .to_str()
+            .unwrap(),
+        mock1_session_id
+    );
+    assert_eq!(
+        tracked_response_2
+            .headers
+            .get("session-id")
+            .expect("header set")
+            .to_str()
+            .unwrap(),
+        mock2_session_id
+    );
 
     assert_eq!(2, server.find_request_count());
 }
