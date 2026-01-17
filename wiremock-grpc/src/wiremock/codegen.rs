@@ -93,7 +93,7 @@ macro_rules! generate {
         impl $type {
             /// Start the server and listens to an available port.
             ///
-            /// The port can be accesed using `address()`
+            /// The port can be accessed using `address()`
             /// ```no_run
             /// let server = MyMockServer::start_default();
             /// let address = server.address();
