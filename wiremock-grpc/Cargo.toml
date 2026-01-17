@@ -1,0 +1,33 @@
+[package]
+name = "wiremock-grpc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+categories.workspace = true
+keywords.workspace = true
+description = "Mock gRPC server to test your outgoing gRPC requests"
+documentation = "https://docs.rs/wiremock-grpc/"
+readme = "../README.md"
+exclude = ["build.rs", "proto/", "tests/"]
+
+[lib]
+doctest = false
+
+[dependencies]
+tonic = { workspace = true }
+tonic-prost = { workspace = true }
+rand = { workspace = true }
+prost = { workspace = true }
+tokio = { workspace = true }
+http-body = { workspace = true }
+log = { workspace = true }
+wiremock-grpc-macros = { workspace = true }
+
+[build-dependencies]
+tonic-build = { workspace = true }
+tonic-prost-build = { workspace = true }
+
+[lints]
+workspace = true

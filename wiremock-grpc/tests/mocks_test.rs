@@ -1,3 +1,5 @@
+#![expect(deprecated)]
+
 mod hello {
     tonic::include_proto!("hello");
 }

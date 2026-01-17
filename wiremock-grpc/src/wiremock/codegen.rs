@@ -4,7 +4,7 @@
 ///
 /// # Arguments
 /// * `prefix` - The prefix of the RPC (eg. `hello.Greeter` if the RPC is `/helloworld.Greeter/SayHello`)
-/// * `type` - Type of the generated server. This [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::grpc_server::GrpcServer). You will be interacting with this type in your test.
+/// * `type` - Type of the generated server. This [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::wiremock::grpc_server::GrpcServer). You will be interacting with this type in your test.
 ///
 /// # Example
 /// ```no_run
@@ -20,6 +20,10 @@
 /// let mut server = MyMockServer::start_default().await;
 /// ```
 #[macro_export]
+#[deprecated(
+    since = "0.4.0",
+    note = "Use `generate_svc!` instead for type-safe API"
+)]
 macro_rules! generate {
     ($prefix:literal, $type: ident) => {
         use ::wiremock_grpc::tonic::{
@@ -89,7 +93,7 @@ macro_rules! generate {
         impl $type {
             /// Start the server and listens to an available port.
             ///
-            /// The port can be accesed using `address()`
+            /// The port can be accessed using `address()`
             /// ```no_run
             /// let server = MyMockServer::start_default();
             /// let address = server.address();
