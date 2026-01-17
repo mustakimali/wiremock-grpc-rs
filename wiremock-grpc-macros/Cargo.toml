@@ -9,7 +9,7 @@ categories.workspace = true
 keywords = ["grpc", "mock", "testing", "proc-macro"]
 description = "Proc macros for wiremock-grpc - generate type-safe RPC method builders"
 documentation = "https://docs.rs/wiremock-grpc-macros/"
-readme = "../README.md"
+readme = "README.md"
 
 [lib]
 proc-macro = true

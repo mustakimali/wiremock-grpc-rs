@@ -4,7 +4,7 @@
 ///
 /// # Arguments
 /// * `prefix` - The prefix of the RPC (eg. `hello.Greeter` if the RPC is `/helloworld.Greeter/SayHello`)
-/// * `type` - Type of the generated server. This [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::grpc_server::GrpcServer). You will be interacting with this type in your test.
+/// * `type` - Type of the generated server. This [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::wiremock::grpc_server::GrpcServer). You will be interacting with this type in your test.
 ///
 /// # Example
 /// ```no_run

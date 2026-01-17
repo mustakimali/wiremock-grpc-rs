@@ -31,8 +31,8 @@ use tonic::{
 /// }
 /// use mock_server::*;
 /// ```
-/// `MyServer` also [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::grpc_server::GrpcServer).
-/// Therefore you can call [`setup`](crate::grpc_server::GrpcServer::setup) / [`find`](crate::grpc_server::GrpcServer::find) functions on it.
+/// `MyServer` also [`Deref`](core::ops::Deref) to [`GrpcServer`](crate::wiremock::grpc_server::GrpcServer).
+/// Therefore you can call [`setup`](crate::wiremock::grpc_server::GrpcServer::setup) / [`find`](crate::wiremock::grpc_server::GrpcServer::find) functions on it.
 #[derive(Clone, Debug)]
 pub struct GrpcServer {
     pub(crate) address: SocketAddr,
