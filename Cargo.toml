@@ -12,9 +12,22 @@ categories = ["development-tools"]
 keywords = ["grpc", "mock", "testing"]
 
 [workspace.dependencies]
+# Local
+wiremock-grpc-macros = { version = "0.1.0", path = "wiremock-grpc-macros" }
+
+# External
+http-body = { version = "1.0.1" }
+log = { version = "0.4.22" }
 proc-macro2 = "1"
+prost = { version = "0.14" }
 quote = "1"
+rand = { version = "0.8.5" }
 syn = { version = "2", features = ["full", "parsing"] }
+tokio = { version = "1.41.1" }
+tonic = { version = "0.14" }
+tonic-build = { version = "0.14" }
+tonic-prost = { version = "0.14" }
+tonic-prost-build = { version = "0.14" }
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }

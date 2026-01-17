@@ -16,18 +16,18 @@ exclude = ["build.rs", "proto/", "tests/"]
 doctest = false
 
 [dependencies]
-tonic = { version = "0.14" }
-tonic-prost = { version = "0.14" }
-rand = { version = "0.8.5" }
-prost = { version = "0.14" }
-tokio = { version = "1.41.1" }
-http-body = { version = "1.0.1" }
-log = { version = "0.4.22" }
-wiremock-grpc-macros = { version = "0.1.0", path = "../wiremock-grpc-macros" }
+tonic = { workspace = true }
+tonic-prost = { workspace = true }
+rand = { workspace = true }
+prost = { workspace = true }
+tokio = { workspace = true }
+http-body = { workspace = true }
+log = { workspace = true }
+wiremock-grpc-macros = { workspace = true }
 
 [build-dependencies]
-tonic-build = { version = "0.14" }
-tonic-prost-build = { version = "0.14" }
+tonic-build = { workspace = true }
+tonic-prost-build = { workspace = true }
 
 [lints]
 workspace = true
