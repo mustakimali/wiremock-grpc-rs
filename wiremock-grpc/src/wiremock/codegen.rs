@@ -16,8 +16,10 @@
 /// use wiremock_gen::*;  // this imports generated
 /// use wiremock_grpc::*; // this imports MockBuilder
 ///
+/// # async fn example() {
 /// // ... Later in your test (MyMockServer is generated above)
 /// let mut server = MyMockServer::start_default().await;
+/// # }
 /// ```
 #[macro_export]
 #[deprecated(

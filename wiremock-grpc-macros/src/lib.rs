@@ -8,7 +8,7 @@ use syn::{
     Ident, Result, Token,
 };
 
-/// Generates a complete mock gRPC server with type-safe RPC method builders.
+/// Generates a complete mock gRPC server with RPC method builders.
 ///
 /// This macro creates:
 /// - A mock server struct (`{ServiceName}MockServer` or custom name with `as`)
@@ -16,8 +16,11 @@ use syn::{
 ///
 /// # Syntax
 ///
-/// ```ignore
-/// wiremock_grpc::generate_svc! {
+/// ```
+/// # macro_rules! generate_svc {
+/// #     ($($tt:tt)*) => {};
+/// # }
+/// generate_svc! {
 ///     package hello;
 ///     service Greeter {
 ///         SayHello,
@@ -28,8 +31,11 @@ use syn::{
 ///
 /// Or with a custom server name:
 ///
-/// ```ignore
-/// wiremock_grpc::generate_svc! {
+/// ```
+/// # macro_rules! generate_svc {
+/// #     ($($tt:tt)*) => {};
+/// # }
+/// generate_svc! {
 ///     package hello;
 ///     service Greeter as MyMockServer {
 ///         SayHello,
@@ -46,9 +52,23 @@ use syn::{
 ///
 /// # Example
 ///
-/// ```ignore
-/// use wiremock_grpc::generate_svc;
-///
+/// ```no_run
+/// # macro_rules! generate_svc {
+/// #     ($($tt:tt)*) => {};
+/// # }
+/// # struct MockBuilder;
+/// # impl MockBuilder {
+/// #     fn when() -> Self { MockBuilder }
+/// #     fn path_say_hello(self) -> Self { self }
+/// #     fn then(self) -> Self { self }
+/// #     fn return_body<F>(self, _f: F) -> Self { self }
+/// # }
+/// # struct HelloReply { message: String }
+/// # struct GreeterMockServer;
+/// # impl GreeterMockServer {
+/// #     async fn start_default() -> Self { GreeterMockServer }
+/// #     fn setup(&mut self, _builder: MockBuilder) {}
+/// # }
 /// generate_svc! {
 ///     package hello;
 ///     service Greeter {
@@ -57,13 +77,12 @@ use syn::{
 ///     }
 /// }
 ///
-/// #[tokio::test]
-/// async fn test_grpc() {
+/// async fn example() {
 ///     let mut server = GreeterMockServer::start_default().await;
 ///
 ///     server.setup(
 ///         MockBuilder::when()
-///             .path_say_hello()  // type-safe method!
+///             .path_say_hello()
 ///             .then()
 ///             .return_body(|| HelloReply { message: "Hi".into() })
 ///     );

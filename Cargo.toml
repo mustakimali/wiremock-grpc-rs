@@ -3,7 +3,7 @@ members = ["wiremock-grpc", "wiremock-grpc-macros"]
 resolver = "2"
 
 [workspace.package]
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Mohammad Mustakim Ali <i@mustak.im>"]
