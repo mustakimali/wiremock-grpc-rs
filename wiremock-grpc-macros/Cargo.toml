@@ -1,0 +1,23 @@
+[package]
+name = "wiremock-grpc-macros"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+categories.workspace = true
+keywords = ["grpc", "mock", "testing", "proc-macro"]
+description = "Proc macros for wiremock-grpc - generate type-safe RPC method builders"
+documentation = "https://docs.rs/wiremock-grpc-macros/"
+readme = "../README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+
+[lints]
+workspace = true

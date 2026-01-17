@@ -37,6 +37,10 @@ pub struct WhenBuilder {
     headers: HeaderMap,
 }
 impl WhenBuilder {
+    #[deprecated(
+        since = "0.4.0",
+        note = "Use the type-safe API instead. String-based API is there for backward compatibility but will be removed in the future."
+    )]
     pub fn path(&self, p: &str) -> Self {
         Self {
             path: Some(p.into()),

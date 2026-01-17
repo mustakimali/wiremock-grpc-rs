@@ -20,6 +20,10 @@
 /// let mut server = MyMockServer::start_default().await;
 /// ```
 #[macro_export]
+#[deprecated(
+    since = "0.4.0",
+    note = "Use `generate_svc!` instead for type-safe API"
+)]
 macro_rules! generate {
     ($prefix:literal, $type: ident) => {
         use ::wiremock_grpc::tonic::{

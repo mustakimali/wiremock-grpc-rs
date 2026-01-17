@@ -21,7 +21,13 @@ use tonic::{
 /// macro generated server to instantiate this for you.
 /// ```no_run
 /// mod mock_server {
-///     wiremock_grpc::generate!("hello.Greeter", MyServer);
+///     wiremock_grpc::generate_svc! {
+///         package hello;
+///         service Greeter as MyMockServer {
+///             SayHello,
+///             WeatherInfo,
+///         }
+///     }
 /// }
 /// use mock_server::*;
 /// ```

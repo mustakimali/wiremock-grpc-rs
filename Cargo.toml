@@ -1,32 +1,22 @@
-[package]
-name = "wiremock-grpc"
-version = "0.3.1"
+[workspace]
+members = ["wiremock-grpc", "wiremock-grpc-macros"]
+resolver = "2"
+
+[workspace.package]
+version = "0.4.0"
 edition = "2021"
-description = "Mock gRPC server to test your outgoing gRPC requests"
 license = "MIT OR Apache-2.0"
 authors = ["Mohammad Mustakim Ali <i@mustak.im>"]
-documentation = "https://docs.rs/wiremock-grpc/"
 repository = "https://github.com/mustakimali/wiremock-grpc-rs"
 categories = ["development-tools"]
 keywords = ["grpc", "mock", "testing"]
 
-[lib]
-doctest = false
+[workspace.dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full", "parsing"] }
 
-[dependencies]
-tonic = { version = "0.14" }
-tonic-prost = { version = "0.14" }
-rand = { version = "0.8.5" }
-prost = { version = "0.14" }
-tokio = { version = "1.41.1" }
-http-body = { version = "1.0.1" }
-log = { version = "0.4.22" }
-
-[build-dependencies]
-tonic-build = { version = "0.14" }
-tonic-prost-build = { version = "0.14" }
-
-[lints.clippy]
+[workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
 cargo = { level = "warn", priority = 1 }
 multiple_crate_versions = { level = "allow", priority = 2 }
