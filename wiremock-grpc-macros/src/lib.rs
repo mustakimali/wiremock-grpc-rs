@@ -285,9 +285,7 @@ fn to_snake_case(s: &str) -> String {
                 // Insert underscore at:
                 // - Transition from lowercase/digit/underscore to uppercase, or
                 // - Boundary between an acronym and a following word, e.g. "HTTPServer".
-                if !prev.is_uppercase()
-                    || next.map(|n| n.is_lowercase()).unwrap_or(false)
-                {
+                if !prev.is_uppercase() || next.map(|n| n.is_lowercase()).unwrap_or(false) {
                     result.push('_');
                 }
             }
@@ -300,4 +298,12 @@ fn to_snake_case(s: &str) -> String {
         }
     }
     result
+}
+
+#[test]
+fn test_to_snake_case() {
+    assert_eq!(to_snake_case("HTTPServer"), "http_server");
+    assert_eq!(to_snake_case("GetWeather"), "get_weather");
+    assert_eq!(to_snake_case("nothing"), "nothing");
+    assert_eq!(to_snake_case(""), "");
 }
