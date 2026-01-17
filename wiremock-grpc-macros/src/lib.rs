@@ -274,12 +274,27 @@ impl ServiceDefinition {
 
 fn to_snake_case(s: &str) -> String {
     let mut result = String::new();
-    for (i, ch) in s.chars().enumerate() {
+    let chars: Vec<char> = s.chars().collect();
+
+    for (i, &ch) in chars.iter().enumerate() {
         if ch.is_uppercase() {
             if i > 0 {
-                result.push('_');
+                let prev = chars[i - 1];
+                let next = chars.get(i + 1).copied();
+
+                // Insert underscore at:
+                // - Transition from lowercase/digit/underscore to uppercase, or
+                // - Boundary between an acronym and a following word, e.g. "HTTPServer".
+                if !prev.is_uppercase()
+                    || next.map(|n| n.is_lowercase()).unwrap_or(false)
+                {
+                    result.push('_');
+                }
             }
-            result.push(ch.to_lowercase().next().unwrap());
+
+            for lower in ch.to_lowercase() {
+                result.push(lower);
+            }
         } else {
             result.push(ch);
         }
