@@ -3,7 +3,7 @@ members = ["wiremock-grpc", "wiremock-grpc-macros"]
 resolver = "2"
 
 [workspace.package]
-version = "0.4.3"
+version = "0.4.4"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Mohammad Mustakim Ali <i@mustak.im>"]
@@ -13,7 +13,7 @@ keywords = ["grpc", "mock", "testing"]
 
 [workspace.dependencies]
 # Local
-wiremock-grpc-macros = { version = "0.1.1", path = "wiremock-grpc-macros" }
+wiremock-grpc-macros = { version = "0.1.2", path = "wiremock-grpc-macros" }
 
 # External
 http-body = { version = "1.0.1" }
